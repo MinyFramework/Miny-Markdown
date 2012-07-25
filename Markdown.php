@@ -292,7 +292,7 @@ class Markdown implements iFormatter
     private function transformHorizontalRules($text)
     {
         $hr_patterns = '\*|_|-';
-        $hr_pattern = '/[ ]{0,2}([ ]?' . $hr_patterns . '[ ]?){3,}\s*/';
+        $hr_pattern = '/^[ ]{0,2}([ ]?' . $hr_patterns . '[ ]?){3,}\s*$/';
         return preg_replace($hr_pattern, "<hr />\n", $text);
     }
 
@@ -345,7 +345,7 @@ class Markdown implements iFormatter
 
     private function transformCodeBlocks($text)
     {
-        $code_block_pattern = '/(?:\n\n|\A)((?:(?:[ ]{4}).*\n+)+)((?=^[ ]{0,4}\S)|\Z)/mu';
+        $code_block_pattern = '/(?:\n\n|\A)((?:(?:[ ]{4}).*\n*)+)((?=^[ ]{0,4}\S)|\Z)/mu';
         $callback = array($this, 'transformCodeBlocksCallback');
         return preg_replace_callback($code_block_pattern, $callback, $text);
     }
