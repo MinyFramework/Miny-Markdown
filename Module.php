@@ -20,7 +20,8 @@ class Module extends \Miny\Application\Module
         $app->add('thumbnail', __NAMESPACE__ . '\Thumbnail');
 
         $app->getBlueprint('view')
-                ->addMethodCall('addMethod', 'format', '*formatter::format');
+                ->addMethodCall('addMethod', 'format', '*formatter::format')
+                ->addMethodCall('addMethod', 'markdown', '*markdown::format');
     }
 
 }
