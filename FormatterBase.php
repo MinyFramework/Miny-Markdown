@@ -36,7 +36,7 @@ class FormatterBase
 
     public function format($text)
     {
-        if (!is_null($this->cache)) {
+        if (0 && !is_null($this->cache)) {
             $key = md5($text);
             if (!$this->cache->has($key)) {
                 $text = $this->doFormat($text);

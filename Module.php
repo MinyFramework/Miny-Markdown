@@ -17,7 +17,6 @@ class Module extends \Miny\Application\Module
     {
         $app->add('formatter', __NAMESPACE__ . '\FormatterBase');
         $app->add('markdown', __NAMESPACE__ . '\Markdown');
-        $app->add('thumbnail', __NAMESPACE__ . '\Thumbnail');
 
         $app->getBlueprint('view')
                 ->addMethodCall('addMethod', 'format', '*formatter::format')

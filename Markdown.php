@@ -79,7 +79,11 @@ class Markdown implements iFormatter
 
     public function addLineFormatter($pattern, $formatter)
     {
-        $this->line_formatters[$pattern] = $formatter;
+        if (is_null($pattern)) {
+            $this->line_formatters[] = $formatter;
+        } else {
+            $this->line_formatters[$pattern] = $formatter;
+        }
     }
 
     public function addBlockFormatter($formatter)
@@ -94,7 +98,11 @@ class Markdown implements iFormatter
     {
         foreach ($this->line_formatters as $pattern => $formatter) {
             if (is_callable($formatter)) {
-                $line = preg_replace_callback($pattern, $formatter, $line);
+                if (!is_numeric($pattern)) {
+                    $line = preg_replace_callback($pattern, $formatter, $line);
+                } else {
+                    $line = call_user_func($formatter, $line);
+                }
             } elseif (is_callable(array($this, $formatter))) {
                 $line = preg_replace_callback($pattern, array($this, $formatter), $line);
             } elseif (is_string($formatter)) {
@@ -122,16 +130,16 @@ class Markdown implements iFormatter
             'itallic'          => '/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u'
         );
         $replacements = array(
-            'code'              => array($this, 'insertCode'),
-            'image'             => array($this, 'insertImage'),
-            'image_definition'  => array($this, 'insertImageDefinition'),
-            'link'              => array($this, 'insertLink'),
-            'link_definition'   => array($this, 'insertLinkDefinition'),
-            'autoemail'         => array($this, 'insertEmail'),
-            'autolink'          => array($this, 'insertLink'),
-            'bold'              => '<strong>$2</strong>',
-            'itallic'           => '<em>$2</em>',
-            'youtube'           => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
+            'code' => array($this, 'insertCode'),
+            'image' => array($this, 'insertImage'),
+            'image_definition' => array($this, 'insertImageDefinition'),
+            'link' => array($this, 'insertLink'),
+            'link_definition' => array($this, 'insertLinkDefinition'),
+            'autoemail' => array($this, 'insertEmail'),
+            'autolink' => array($this, 'insertLink'),
+            'bold'    => '<strong>$2</strong>',
+            'itallic' => '<em>$2</em>',
+            'youtube' => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
         );
         foreach ($patterns as $name => $pattern) {
             $this->line_formatters[$pattern] = $replacements[$name];
