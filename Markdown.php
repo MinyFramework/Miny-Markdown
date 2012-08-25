@@ -23,77 +23,33 @@
 
 /**
  * This file is part of the Miny framework.
+ * (c) Dániel Buga <daniel@bugadani.hu>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version accepted by the author in accordance with section
- * 14 of the GNU General Public License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @package   Miny/Modules/Formatter
- * @copyright 2012 Dániel Buga <daniel@bugadani.hu>
- * @license   http://www.gnu.org/licenses/gpl.txt
- *            GNU General Public License
- * @version   1.0
+ * For licensing information see the LICENSE file.
  */
 
 namespace Modules\Formatter;
 
+use InvalidArgumentException;
+
 class Markdown implements iFormatter
 {
-    private $links = array();
-    private $html_blocks = array();
     private static $char_map = array(
-        '\\\\'    => '\\',
-        '\`'      => '`',
-        '\*'      => '*',
-        '\_'      => '_',
-        '\{'      => '{',
-        '\}'      => '}',
-        '\['      => '[',
-        '\]'      => ']',
-        '\('      => '(',
-        '\)'      => ')',
-        '\#'      => '#',
-        '\+'      => '+',
-        '\-'      => '-',
-        '\.'      => '.',
-        '\!'      => '!'
-    );
-    //one-liner patterns
-    private static $patterns = array(
-        'code'             => '/(?<!\\\)(`+)(.*?)(?<!\\\)\1/u',
-        'youtube'          => '/(?<!\\\)\[youtube\]\((.+?)(?<!\\\)\)/u',
-        'image'            => '/(?<!\\\)!\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
-        'image_definition' => '/(?<!\\\)!\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
-        'link'             => '/(?<!\\\)\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
-        'link_definition'  => '/(?<!\\\)\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
-        'autoemail'        => '/(?<!\\\)<(\w+@(\w+[.])*\w+)>/u',
-        'autolink'         => '/(?<!\\\)<((?:http|https|ftp):\/\/.*?)(?<!\\\)>/u',
-        'bold'             => '/(?<!\\\)(\*\*|__)(.+?)(?<!\\\)\1/u',
-        'itallic'          => '/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u'
-    );
-    private static $pattern_callbacks = array(
-        'code'             => 'insertCode',
-        'image'            => 'insertImage',
-        'image_definition' => 'insertImageDefinition',
-        'link'             => 'insertLink',
-        'link_definition'  => 'insertLinkDefinition',
-        'autoemail'        => 'insertEmail',
-        'autolink'         => 'insertLink'
-    );
-    private static $pattern_replaces = array(
-        'bold'    => '<strong>$2</strong>',
-        'itallic' => '<em>$2</em>',
-        'youtube' => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
+        '\\\\' => '\\',
+        '\`'   => '`',
+        '\*'   => '*',
+        '\_'   => '_',
+        '\{'   => '{',
+        '\}'   => '}',
+        '\['   => '[',
+        '\]'   => ']',
+        '\('   => '(',
+        '\)'   => ')',
+        '\#'   => '#',
+        '\+'   => '+',
+        '\-'   => '-',
+        '\.'   => '.',
+        '\!'   => '!'
     );
 
     public static function escape($str)
@@ -106,27 +62,86 @@ class Markdown implements iFormatter
         return strtr($str, self::$char_map);
     }
 
+    private static function outdent($text)
+    {
+        return preg_replace('/^([ ]{1,4})/m', '', $text);
+    }
+
+    protected $line_formatters = array();
+    protected $block_formatters = array();
+    protected $links = array();
+    protected $html_blocks = array();
+
     private function escapeSpan($matches)
     {
         return self::escape($matches[1]);
     }
 
+    public function addLineFormatter($pattern, $formatter)
+    {
+        $this->line_formatters[$pattern] = $formatter;
+    }
+
+    public function addBlockFormatter($formatter)
+    {
+        if (!is_callable($formatter)) {
+            throw new InvalidArgumentException('Block formatter must be callable.');
+        }
+        $this->block_formatters[] = $formatter;
+    }
+
     public function formatLine($line)
     {
-        foreach (self::$patterns as $name => $pattern) {
-            if (isset(self::$pattern_callbacks[$name])) {
-                $callback = array($this, self::$pattern_callbacks[$name]);
-                $line = preg_replace_callback($pattern, $callback, $line);
-            } elseif (isset(self::$pattern_replaces[$name])) {
-                $replacement = self::$pattern_replaces[$name];
-                $line = preg_replace($pattern, $replacement, $line);
+        foreach ($this->line_formatters as $pattern => $formatter) {
+            if (is_callable($formatter)) {
+                $line = preg_replace_callback($pattern, $formatter, $line);
+            } elseif (is_callable(array($this, $formatter))) {
+                $line = preg_replace_callback($pattern, array($this, $formatter), $line);
+            } elseif (is_string($formatter)) {
+                $line = preg_replace($pattern, $formatter, $line);
             } else {
-                $message = 'Pattern replacement not found: ' . $name;
-                throw new \OutOfBoundsException($message);
+                throw new InvalidArgumentException('Formatter must be callable or string.');
             }
         }
         $line = str_replace("  \n", '<br />', $line);
         return $line;
+    }
+
+    public function __construct()
+    {
+        $patterns = array(
+            'code'             => '/(?<!\\\)(`+)(.*?)(?<!\\\)\1/u',
+            'youtube'          => '/(?<!\\\)\[youtube\]\((.+?)(?<!\\\)\)/u',
+            'image'            => '/(?<!\\\)!\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
+            'image_definition' => '/(?<!\\\)!\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
+            'link'             => '/(?<!\\\)\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
+            'link_definition'  => '/(?<!\\\)\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
+            'autoemail'        => '/(?<!\\\)<(\w+@(\w+[.])*\w+)>/u',
+            'autolink'         => '/(?<!\\\)<((?:http|https|ftp):\/\/.*?)(?<!\\\)>/u',
+            'bold'             => '/(?<!\\\)(\*\*|__)(.+?)(?<!\\\)\1/u',
+            'itallic'          => '/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u'
+        );
+        $replacements = array(
+            'code'              => array($this, 'insertCode'),
+            'image'             => array($this, 'insertImage'),
+            'image_definition'  => array($this, 'insertImageDefinition'),
+            'link'              => array($this, 'insertLink'),
+            'link_definition'   => array($this, 'insertLinkDefinition'),
+            'autoemail'         => array($this, 'insertEmail'),
+            'autolink'          => array($this, 'insertLink'),
+            'bold'              => '<strong>$2</strong>',
+            'itallic'           => '<em>$2</em>',
+            'youtube'           => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
+        );
+        foreach ($patterns as $name => $pattern) {
+            $this->line_formatters[$pattern] = $replacements[$name];
+        }
+
+        $this->block_formatters = array(
+            array($this, 'transformLists'),
+            array($this, 'transformCodeBlocks'),
+            array($this, 'transformBlockQuotes'),
+        );
     }
 
     private function randomize($str)
@@ -164,9 +179,8 @@ class Markdown implements iFormatter
     private function insertLink($matches)
     {
         if (isset($matches[3])) {
-            return sprintf('<a href="%s" title="%s">%s</a>',
-                            self::escape($matches[2]),
-                            self::escape($matches[3]), $matches[1]);
+            return sprintf('<a href="%s" title="%s">%s</a>', self::escape($matches[2]), self::escape($matches[3]),
+                            $matches[1]);
         } else {
             if (isset($matches[2])) {
                 $href = self::escape($matches[2]);
@@ -181,11 +195,9 @@ class Markdown implements iFormatter
     {
         $matches = array_map('self::escape', $matches);
         if (isset($matches[3])) {
-            $pattern = '<img src="%s" title="%s" alt="%s" />';
-            return sprintf($pattern, $matches[2], $matches[3], $matches[1]);
+            return sprintf('<img src="%s" title="%s" alt="%s" />', $matches[2], $matches[3], $matches[1]);
         } else {
-            $pattern = '<img src="%s" alt="%s" />';
-            return sprintf($pattern, $matches[2], $matches[1]);
+            return sprintf('<img src="%s" alt="%s" />', $matches[2], $matches[1]);
         }
     }
 
@@ -231,8 +243,7 @@ class Markdown implements iFormatter
                     array(
                 '/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/',
                 '#<(?![a-z/?\$!])#'
-                    ),
-                    array(
+                    ), array(
                 '&amp;',
                 '&lt;'
                     ), $matches[2])); //url
@@ -259,8 +270,7 @@ class Markdown implements iFormatter
 
     private function callbackHeader($str, $level)
     {
-        return sprintf('<h%2$d>%1$s</h%2$d>' . "\n\n", $this->formatLine($str),
-                        $level);
+        return sprintf('<h%2$d>%1$s</h%2$d>' . "\n\n", $this->formatLine($str), $level);
     }
 
     private function callbackInsertHeader($matches)
@@ -283,10 +293,8 @@ class Markdown implements iFormatter
 
     private function transformHeaders($text)
     {
-        $text = preg_replace_callback('/^(.+)[ ]*\n(=|-)+[ ]*\n+/mu',
-                array($this, 'callbackInsertSetexHeader'), $text);
-        return preg_replace_callback('/^(#{1,6})\s*(.+?)\s*#*\n+/mu',
-                        array($this, 'callbackInsertHeader'), $text);
+        $text = preg_replace_callback('/^(.+)[ ]*\n(=|-)+[ ]*\n+/mu', array($this, 'callbackInsertSetexHeader'), $text);
+        return preg_replace_callback('/^(#{1,6})\s*(.+?)\s*#*\n+/mu', array($this, 'callbackInsertHeader'), $text);
     }
 
     private function transformHorizontalRules($text)
@@ -324,9 +332,9 @@ class Markdown implements iFormatter
         $item = $matches[4];
         $leading_line = $matches[1];
         if ($leading_line || (strpos($item, "\n\n") !== false)) {
-            $item = $this->formatBlock($this->outdent($item));
+            $item = $this->formatBlock(self::outdent($item));
         } else {
-            $item = $this->transformLists($this->outdent($item));
+            $item = $this->transformLists(self::outdent($item));
             $item = $this->formatLine(rtrim($item));
         }
         return sprintf("<li>%s</li>\n", $item);
@@ -336,7 +344,7 @@ class Markdown implements iFormatter
     {
         $code_html = "\n\n<pre><code>%s\n</code></pre>\n\n";
 
-        $matches[1] = self::escape($this->outdent($matches[1]));
+        $matches[1] = self::escape(self::outdent($matches[1]));
         $matches[1] = ltrim($matches[1], "\n");
         $matches[1] = rtrim($matches[1]);
         $matches[1] = sprintf($code_html, $matches[1]);
@@ -359,8 +367,7 @@ class Markdown implements iFormatter
     {
         $matches[1] = preg_replace('/^[ ]*>[ ]?/', '', $matches[1]);
         $matches[1] = '  ' . $matches[1];
-        $matches[1] = preg_replace_callback('#\s*<pre>.+?</pre>#s',
-                array($this, 'trimBlockQuotePre'), $matches[1]);
+        $matches[1] = preg_replace_callback('#\s*<pre>.+?</pre>#s', array($this, 'trimBlockQuotePre'), $matches[1]);
         return sprintf("<blockquote>\n%s\n</blockquote>\n\n", $matches[1]);
     }
 
@@ -414,21 +421,17 @@ class Markdown implements iFormatter
         return $text;
     }
 
-    private function outdent($text)
-    {
-        return preg_replace('/^([ ]{1,4})/m', '', $text);
-    }
-
     private function formatBlock($text)
     {
         $text = $this->transformHeaders($text);
         $text = $this->transformHorizontalRules($text);
-        $text = $this->transformLists($text);
-        $text = $this->transformCodeBlocks($text);
-        $text = $this->transformBlockQuotes($text);
+
+        foreach ($this->block_formatters as $formatter) {
+            $text = call_user_func($formatter, $text);
+        }
+
         $text = $this->hashHTML($text);
-        $text = $this->makeParagraphs($text);
-        return $text;
+        return $this->makeParagraphs($text);
     }
 
     public function format($text)
