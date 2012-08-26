@@ -15,11 +15,9 @@ class Module extends \Miny\Application\Module
 {
     public function init(Application $app)
     {
-        $app->add('formatter', __NAMESPACE__ . '\FormatterBase');
         $app->add('markdown', __NAMESPACE__ . '\Markdown');
 
         $app->getBlueprint('view')
-                ->addMethodCall('addMethod', 'format', '*formatter::format')
                 ->addMethodCall('addMethod', 'markdown', '*markdown::format');
     }
 

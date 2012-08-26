@@ -12,7 +12,7 @@ namespace Modules\Formatter;
 
 use InvalidArgumentException;
 
-class Markdown implements iFormatter
+class Markdown
 {
     protected $line_formatters = array();
     protected $block_formatters = array();
