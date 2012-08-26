@@ -7,7 +7,7 @@
  * For licensing information see the LICENCE file.
  */
 
-namespace Modules\Formatter;
+namespace Modules\Markdown;
 
 class MarkdownUtils
 {

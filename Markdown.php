@@ -8,7 +8,7 @@
  * For licensing information see the LICENSE file.
  */
 
-namespace Modules\Formatter;
+namespace Modules\Markdown;
 
 use InvalidArgumentException;
 
