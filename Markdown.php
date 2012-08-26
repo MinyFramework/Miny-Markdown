@@ -34,39 +34,6 @@ use InvalidArgumentException;
 
 class Markdown implements iFormatter
 {
-    private static $char_map = array(
-        '\\\\' => '\\',
-        '\`'   => '`',
-        '\*'   => '*',
-        '\_'   => '_',
-        '\{'   => '{',
-        '\}'   => '}',
-        '\['   => '[',
-        '\]'   => ']',
-        '\('   => '(',
-        '\)'   => ')',
-        '\#'   => '#',
-        '\+'   => '+',
-        '\-'   => '-',
-        '\.'   => '.',
-        '\!'   => '!'
-    );
-
-    public static function escape($str)
-    {
-        return strtr($str, array_flip(self::$char_map));
-    }
-
-    public static function unescape($str)
-    {
-        return strtr($str, self::$char_map);
-    }
-
-    private static function outdent($text)
-    {
-        return preg_replace('/^([ ]{1,4})/m', '', $text);
-    }
-
     protected $line_formatters = array();
     protected $block_formatters = array();
     protected $links = array();
@@ -74,13 +41,17 @@ class Markdown implements iFormatter
 
     private function escapeSpan($matches)
     {
-        return self::escape($matches[1]);
+        return MarkdownUtils::escape($matches[1]);
     }
 
     public function addLineFormatter($name, $pattern, $formatter)
     {
-        $this->line_formatter_patterns[$name] = $pattern;
-        $this->line_formatters[$name] = $formatter;
+        if (!is_null($pattern)) {
+            $this->line_formatter_patterns[$name] = $pattern;
+        }
+        if (!is_null($formatter)) {
+            $this->line_formatters[$name] = $formatter;
+        }
     }
 
     public function addBlockFormatter($formatter)
@@ -93,7 +64,7 @@ class Markdown implements iFormatter
 
     public function formatLine($line)
     {
-        foreach ($this->line_formatter_patterns as $name => $pattern/* => $formatter*/) {
+        foreach ($this->line_formatter_patterns as $name => $pattern) {
             $formatter = $this->line_formatters[$name];
             if (is_callable($formatter)) {
                 if (is_null($pattern)) {
@@ -128,16 +99,16 @@ class Markdown implements iFormatter
             'itallic'          => '/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u'
         );
         $formatters = array(
-            'code' => array($this, 'insertCode'),
-            'image' => array($this, 'insertImage'),
+            'code'             => 'MarkdownUtils::insertCode',
+            'image'            => 'MarkdownUtils::insertImage',
             'image_definition' => array($this, 'insertImageDefinition'),
-            'link' => array($this, 'insertLink'),
+            'link'            => 'MarkdownUtils::insertLink',
             'link_definition' => array($this, 'insertLinkDefinition'),
-            'autoemail' => array($this, 'insertEmail'),
-            'autolink' => array($this, 'insertLink'),
-            'bold'    => '<strong>$2</strong>',
-            'itallic' => '<em>$2</em>',
-            'youtube' => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
+            'autoemail' => 'MarkdownUtils::insertEmail',
+            'autolink'  => 'MarkdownUtils::insertLink',
+            'bold'      => '<strong>$2</strong>',
+            'itallic'   => '<em>$2</em>',
+            'youtube'   => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
         );
         foreach ($patterns as $name => $pattern) {
             $this->addLineFormatter($name, $pattern, $formatters[$name]);
@@ -148,63 +119,6 @@ class Markdown implements iFormatter
             array($this, 'transformCodeBlocks'),
             array($this, 'transformBlockQuotes'),
         );
-    }
-
-    private function randomize($str)
-    {
-        $out = '';
-        $strlen = strlen($str);
-        for ($i = 0; $i < $strlen; $i++) {
-            switch (rand(0, 2)) {
-                case 0:
-                    $out .= '&#' . ord($str[$i]) . ';';
-                    break;
-                case 1:
-                    $out .= $str[$i];
-                    break;
-                case 2:
-                    $out .= '&#x' . dechex(ord($str[$i])) . ';';
-                    break;
-            }
-        }
-        return $out;
-    }
-
-    private function insertCode($matches)
-    {
-        return '<code>' . self::escape(htmlspecialchars($matches[2])) . '</code>';
-    }
-
-    private function insertEmail($matches)
-    {
-        $mail = $this->randomize($matches[1]);
-        $mailto = $this->randomize('mailto:' . $matches[1]);
-        return sprintf('<a href="%s">%s</a>', $mailto, $mail);
-    }
-
-    private function insertLink($matches)
-    {
-        if (isset($matches[3])) {
-            return sprintf('<a href="%s" title="%s">%s</a>', self::escape($matches[2]), self::escape($matches[3]),
-                            $matches[1]);
-        } else {
-            if (isset($matches[2])) {
-                $href = self::escape($matches[2]);
-            } else {
-                $href = self::escape($matches[1]);
-            }
-            return sprintf('<a href="%s">%s</a>', $href, $matches[1]);
-        }
-    }
-
-    private function insertImage($matches)
-    {
-        $matches = array_map('self::escape', $matches);
-        if (isset($matches[3])) {
-            return sprintf('<img src="%s" title="%s" alt="%s" />', $matches[2], $matches[3], $matches[1]);
-        } else {
-            return sprintf('<img src="%s" alt="%s" />', $matches[2], $matches[1]);
-        }
     }
 
     private function insertLinkDefinition($matches)
@@ -338,9 +252,9 @@ class Markdown implements iFormatter
         $item = $matches[4];
         $leading_line = $matches[1];
         if ($leading_line || (strpos($item, "\n\n") !== false)) {
-            $item = $this->formatBlock(self::outdent($item));
+            $item = $this->formatBlock(MarkdownUtils::outdent($item));
         } else {
-            $item = $this->transformLists(self::outdent($item));
+            $item = $this->transformLists(MarkdownUtils::outdent($item));
             $item = $this->formatLine(rtrim($item));
         }
         return sprintf("<li>%s</li>\n", $item);
@@ -350,7 +264,7 @@ class Markdown implements iFormatter
     {
         $code_html = "\n\n<pre><code>%s\n</code></pre>\n\n";
 
-        $matches[1] = self::escape(self::outdent($matches[1]));
+        $matches[1] = MarkdownUtils::escape(MarkdownUtils::outdent($matches[1]));
         $matches[1] = ltrim($matches[1], "\n");
         $matches[1] = rtrim($matches[1]);
         $matches[1] = sprintf($code_html, $matches[1]);
@@ -447,7 +361,7 @@ class Markdown implements iFormatter
 
         $text = $this->prepare($text);
         $text = $this->formatBlock($text);
-        return self::unescape($text);
+        return MarkdownUtils::unescape($text);
     }
 
 }
