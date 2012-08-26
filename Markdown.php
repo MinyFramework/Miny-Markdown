@@ -77,13 +77,10 @@ class Markdown implements iFormatter
         return self::escape($matches[1]);
     }
 
-    public function addLineFormatter($pattern, $formatter)
+    public function addLineFormatter($name, $pattern, $formatter)
     {
-        if (is_null($pattern)) {
-            $this->line_formatters[] = $formatter;
-        } else {
-            $this->line_formatters[$pattern] = $formatter;
-        }
+        $this->line_formatter_patterns[$name] = $pattern;
+        $this->line_formatters[$name] = $formatter;
     }
 
     public function addBlockFormatter($formatter)
@@ -96,12 +93,13 @@ class Markdown implements iFormatter
 
     public function formatLine($line)
     {
-        foreach ($this->line_formatters as $pattern => $formatter) {
+        foreach ($this->line_formatter_patterns as $name => $pattern/* => $formatter*/) {
+            $formatter = $this->line_formatters[$name];
             if (is_callable($formatter)) {
-                if (!is_numeric($pattern)) {
-                    $line = preg_replace_callback($pattern, $formatter, $line);
-                } else {
+                if (is_null($pattern)) {
                     $line = call_user_func($formatter, $line);
+                } else {
+                    $line = preg_replace_callback($pattern, $formatter, $line);
                 }
             } elseif (is_callable(array($this, $formatter))) {
                 $line = preg_replace_callback($pattern, array($this, $formatter), $line);
@@ -129,7 +127,7 @@ class Markdown implements iFormatter
             'bold'             => '/(?<!\\\)(\*\*|__)(.+?)(?<!\\\)\1/u',
             'itallic'          => '/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u'
         );
-        $replacements = array(
+        $formatters = array(
             'code' => array($this, 'insertCode'),
             'image' => array($this, 'insertImage'),
             'image_definition' => array($this, 'insertImageDefinition'),
@@ -142,7 +140,7 @@ class Markdown implements iFormatter
             'youtube' => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
         );
         foreach ($patterns as $name => $pattern) {
-            $this->line_formatters[$pattern] = $replacements[$name];
+            $this->addLineFormatter($name, $pattern, $formatters[$name]);
         }
 
         $this->block_formatters = array(
