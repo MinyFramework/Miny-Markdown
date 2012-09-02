@@ -17,7 +17,7 @@ class Module extends \Miny\Application\Module
     {
         $app->add('markdown', __NAMESPACE__ . '\Markdown');
 
-        $app->getBlueprint('view')
+        $app->getBlueprint('view_helpers')
                 ->addMethodCall('addMethod', 'markdown', '*markdown::format');
     }
 
