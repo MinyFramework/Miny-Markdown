@@ -9,11 +9,11 @@
 
 namespace Modules\Markdown;
 
-use Miny\Application\Application;
+use Miny\Application\BaseApplication;
 
 class Module extends \Miny\Application\Module
 {
-    public function init(Application $app)
+    public function init(BaseApplication $app)
     {
         $app->add('markdown', __NAMESPACE__ . '\Markdown');
 
