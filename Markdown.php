@@ -52,9 +52,9 @@ class Markdown
                 } else {
                     $line = preg_replace_callback($pattern, $formatter, $line);
                 }
-            } elseif (is_callable(array($this, $formatter))) {
+            } else if (is_callable(array($this, $formatter))) {
                 $line = preg_replace_callback($pattern, array($this, $formatter), $line);
-            } elseif (is_string($formatter)) {
+            } else if (is_string($formatter)) {
                 $line = preg_replace($pattern, $formatter, $line);
             } else {
                 throw new InvalidArgumentException('Formatter must be callable or string.');
@@ -79,16 +79,16 @@ class Markdown
             'itallic'          => '/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u'
         );
         $formatters = array(
-            'code'             => 'MarkdownUtils::insertCode',
-            'image'            => 'MarkdownUtils::insertImage',
+            'code'             => __NAMESPACE__ . '\MarkdownUtils::insertCode',
+            'image'            => __NAMESPACE__ . '\MarkdownUtils::insertImage',
             'image_definition' => array($this, 'insertImageDefinition'),
-            'link'            => 'MarkdownUtils::insertLink',
-            'link_definition' => array($this, 'insertLinkDefinition'),
-            'autoemail' => 'MarkdownUtils::insertEmail',
-            'autolink'  => 'MarkdownUtils::insertLink',
-            'bold'      => '<strong>$2</strong>',
-            'itallic'   => '<em>$2</em>',
-            'youtube'   => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
+            'link'             => __NAMESPACE__ . '\MarkdownUtils::insertLink',
+            'link_definition'  => array($this, 'insertLinkDefinition'),
+            'autoemail'        => __NAMESPACE__ . '\MarkdownUtils::insertEmail',
+            'autolink'         => __NAMESPACE__ . '\MarkdownUtils::insertLink',
+            'bold'             => '<strong>$2</strong>',
+            'itallic'          => '<em>$2</em>',
+            'youtube'          => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
         );
         foreach ($patterns as $name => $pattern) {
             $this->addLineFormatter($name, $pattern, $formatters[$name]);
@@ -165,7 +165,7 @@ class Markdown
         $text = preg_replace("/^\s*$/mu", '', $text);
         $text = $this->hashHTML($text);
         return preg_replace_callback('/^[ ]{0,3}\[(.*)\]:[ ]*\n?[ ]*<?(\S+?)>?[ ]*\n?[ ]*(?:(?<=\s)["(](.*?)[")][ ]*)?(?:\n+|\Z)/mu',
-                        array($this, 'collectLinkDefinition'), $text);
+                array($this, 'collectLinkDefinition'), $text);
     }
 
     private function callbackHeader($str, $level)
