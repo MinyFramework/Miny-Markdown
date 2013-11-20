@@ -115,7 +115,7 @@ class Markdown
             return $matches[0];
         }
         $link[1] = $matches[1];
-        return $this->insertLink($link);
+        return MarkdownUtils::insertLink($link);
     }
 
     private function insertImageDefinition($matches)
@@ -133,7 +133,7 @@ class Markdown
             return $matches[0];
         }
         $link[1] = $matches[1];
-        return $this->insertImage($link);
+        return MarkdownUtils::insertImage($link);
     }
 
     private function collectLinkDefinition($matches)
