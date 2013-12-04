@@ -13,12 +13,20 @@ use Miny\Application\BaseApplication;
 
 class Module extends \Miny\Application\Module
 {
+
     public function init(BaseApplication $app)
     {
         $app->add('markdown', __NAMESPACE__ . '\Markdown');
 
         $app->getBlueprint('view_helpers')
                 ->addMethodCall('addMethod', 'markdown', '*markdown::format');
-    }
 
+        $this->ifModule('Templating',
+                function()use($app) {
+            $app->getBlueprint('template_plugins')
+                    ->addMethodCall('addMethod', 'markdown', '*markdown::format');
+            $app->getBlueprint('template_descriptor')
+                    ->addMethodCall('addSafeFilter', 'markdown');
+        });
+    }
 }
