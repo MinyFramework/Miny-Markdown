@@ -21,12 +21,11 @@ class Module extends \Miny\Application\Module
         $app->getBlueprint('view_helpers')
                 ->addMethodCall('addMethod', 'markdown', '*markdown::format');
 
-        $this->ifModule('Templating',
-                function()use($app) {
-            $app->getBlueprint('template_plugins')
-                    ->addMethodCall('addMethod', 'markdown', '*markdown::format');
-            $app->getBlueprint('template_descriptor')
-                    ->addMethodCall('addSafeFilter', 'markdown');
+        $this->ifModule('Templating', function()use($app) {
+            $app->add('markdown_function', '\Modules\Templating\Compiler\Functions\CallbackFunction')
+                    ->setArguments('markdown', '*markdown::format', true);
+            $app->getBlueprint('template_environment')
+                    ->addMethodCall('addFunction', '&markdown_function');
         });
     }
 }
