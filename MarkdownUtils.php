@@ -71,8 +71,8 @@ class MarkdownUtils
 
     public static function insertEmail($matches)
     {
-        $mail = $this->randomize($matches[1]);
-        $mailto = $this->randomize('mailto:' . $matches[1]);
+        $mail = self::randomize($matches[1]);
+        $mailto = self::randomize('mailto:' . $matches[1]);
         return sprintf('<a href="%s">%s</a>', $mailto, $mail);
     }
 

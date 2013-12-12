@@ -21,6 +21,11 @@ class Module extends \Miny\Application\Module
         $app->getBlueprint('view_helpers')
                 ->addMethodCall('addMethod', 'markdown', '*markdown::format');
 
+        $this->ifModule('Cache', function()use($app) {
+            $app->getBlueprint('markdown')
+                    ->setArguments('&cache');
+        });
+
         $this->ifModule('Templating', function()use($app) {
             $app->add('markdown_function', '\Modules\Templating\Compiler\Functions\CallbackFunction')
                     ->setArguments('markdown', '*markdown::format', true);

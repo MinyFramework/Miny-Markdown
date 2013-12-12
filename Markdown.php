@@ -11,13 +11,18 @@
 namespace Modules\Markdown;
 
 use InvalidArgumentException;
+use Modules\Cache\iCacheDriver;
 
 class Markdown
 {
-    protected $line_formatters = array();
+    /**
+     * @var iCacheDriver
+     */
+    private $cache;
+    protected $line_formatters  = array();
     protected $block_formatters = array();
-    protected $links = array();
-    protected $html_blocks = array();
+    protected $links            = array();
+    protected $html_blocks      = array();
 
     private function escapeSpan($matches)
     {
@@ -64,9 +69,10 @@ class Markdown
         return $line;
     }
 
-    public function __construct()
+    public function __construct(iCacheDriver $cache = NULL)
     {
-        $patterns = array(
+        $this->cache = $cache;
+        $patterns    = array(
             'code'             => '/(?<!\\\)(`+)(.*?)(?<!\\\)\1/u',
             'youtube'          => '/(?<!\\\)\[youtube\]\((.+?)(?<!\\\)\)/u',
             'image'            => '/(?<!\\\)!\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
@@ -78,7 +84,7 @@ class Markdown
             'bold'             => '/(?<!\\\)(\*\*|__)(.+?)(?<!\\\)\1/u',
             'itallic'          => '/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u'
         );
-        $formatters = array(
+        $formatters  = array(
             'code'             => __NAMESPACE__ . '\MarkdownUtils::insertCode',
             'image'            => __NAMESPACE__ . '\MarkdownUtils::insertImage',
             'image_definition' => array($this, 'insertImageDefinition'),
@@ -156,7 +162,7 @@ class Markdown
 
     private function prepare($text)
     {
-        $arr = array(
+        $arr  = array(
             "\r\n" => "\n",
             "\r"   => "\n",
             "\t"   => '    ',
@@ -200,14 +206,14 @@ class Markdown
     private function transformHorizontalRules($text)
     {
         $hr_patterns = '\*|_|-';
-        $hr_pattern = '/^[ ]{0,2}([ ]?' . $hr_patterns . '[ ]?){3,}\s*$/';
+        $hr_pattern  = '/^[ ]{0,2}([ ]?' . $hr_patterns . '[ ]?){3,}\s*$/';
         return preg_replace($hr_pattern, "<hr />\n", $text);
     }
 
     private function transformLists($text)
     {
         $lists_pattern = '/^(([ ]{0,3}((?:[*+-]|\d+[.]))[ ]+)(?s:.+?)(\z|\n{2,}(?=\S)(?![ ]*(?:[*+-]|\d+[.])[ ]+)))/mu';
-        $callback = array($this, 'transformListsCallback');
+        $callback      = array($this, 'transformListsCallback');
         return preg_replace_callback($lists_pattern, $callback, $text);
     }
 
@@ -229,7 +235,7 @@ class Markdown
 
     private function processListItemsCallback($matches)
     {
-        $item = $matches[4];
+        $item         = $matches[4];
         $leading_line = $matches[1];
         if ($leading_line || (strpos($item, "\n\n") !== false)) {
             $item = $this->formatBlock(MarkdownUtils::outdent($item));
@@ -242,8 +248,7 @@ class Markdown
 
     private function transformCodeBlocksCallback($matches)
     {
-        $code_html = "\n\n<pre><code>%s\n</code></pre>\n\n";
-
+        $code_html  = "\n\n<code><pre>%s\n</pre></code>\n\n";
         $matches[1] = MarkdownUtils::escape(MarkdownUtils::outdent($matches[1]));
         $matches[1] = ltrim($matches[1], "\n");
         $matches[1] = rtrim($matches[1]);
@@ -253,8 +258,8 @@ class Markdown
 
     private function transformCodeBlocks($text)
     {
-        $code_block_pattern = '/(?:\n\n|\A)((?:(?:[ ]{4}).*\n*)+)((?=^[ ]{0,4}\S)|\Z)/mu';
-        $callback = array($this, 'transformCodeBlocksCallback');
+        $code_block_pattern = '/(?:\n\n|\A)((?:(?:[ ]{4}).*\n*)+)((?=^[ ]{0,4}\S)|$)/mu';
+        $callback           = array($this, 'transformCodeBlocksCallback');
         return preg_replace_callback($code_block_pattern, $callback, $text);
     }
 
@@ -274,14 +279,14 @@ class Markdown
     private function transformBlockQuotes($text)
     {
         $block_quote_pattern = '/((^[ ]*>[ ]?.+\n(.+\n)*(?:\n)*)+)/mu';
-        $callback = array($this, 'transformBlockQuotesCallback');
+        $callback            = array($this, 'transformBlockQuotesCallback');
         return preg_replace_callback($block_quote_pattern, $callback, $text);
     }
 
     private function makeParagraphs($text)
     {
-        $text = preg_replace('/\\A\n+/', '', $text);
-        $text = preg_replace('/\n+\\z/', '', $text);
+        $text  = preg_replace('/\\A\n+/', '', $text);
+        $text  = preg_replace('/\n+\\z/', '', $text);
         $lines = preg_split('/\n{2,}/', $text);
         foreach ($lines as &$line) {
             if (!isset($this->html_blocks[$line])) {
@@ -296,15 +301,15 @@ class Markdown
 
     private function storeHTMLBlock($matches)
     {
-        $key = hash('md5', $matches[1]);
+        $key                     = hash('md5', $matches[1]);
         $this->html_blocks[$key] = $matches[1];
         return "\n\n" . $key . "\n\n";
     }
 
     private function hashHTML($text)
     {
-        $block_tags_a = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
-        $block_tags_b = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math';
+        $block_tags_a = 'p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
+        $block_tags_b = 'p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math';
 
         $html_patterns = array(
             '#(^<(' . $block_tags_a . ')\b(.*\n)*?</\2>[ \t]*(?=\n+|\Z))#mux',
@@ -336,12 +341,20 @@ class Markdown
 
     public function format($text)
     {
-        $this->links = array();
+        if ($this->cache !== null) {
+            $cache_key = sha1($text);
+            if ($this->cache->has($cache_key)) {
+                return $this->cache->get($cache_key);
+            }
+        }
+        $this->links       = array();
         $this->html_blocks = array();
-
-        $text = $this->prepare($text);
-        $text = $this->formatBlock($text);
-        return MarkdownUtils::unescape($text);
+        $text              = $this->prepare($text);
+        $formatted         = $this->formatBlock($text);
+        $unescaped         = MarkdownUtils::unescape($formatted);
+        if ($this->cache !== null) {
+            $this->cache->store($cache_key, $unescaped, 24 * 60 * 60 * 7 * 52);
+        }
+        return $unescaped;
     }
-
 }
