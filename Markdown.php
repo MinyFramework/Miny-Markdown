@@ -88,7 +88,7 @@ class Markdown
             'autolink'         => __NAMESPACE__ . '\MarkdownUtils::insertLink',
             'bold'             => '<strong>$2</strong>',
             'itallic'          => '<em>$2</em>',
-            'youtube'          => '<iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe>'
+            'youtube'          => '<div class="youtubeWrapper"><iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe></div>'
         );
         foreach ($patterns as $name => $pattern) {
             $this->addLineFormatter($name, $pattern, $formatters[$name]);
