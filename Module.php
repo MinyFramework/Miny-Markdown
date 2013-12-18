@@ -18,9 +18,6 @@ class Module extends \Miny\Application\Module
     {
         $app->add('markdown', __NAMESPACE__ . '\Markdown');
 
-        $app->getBlueprint('view_helpers')
-                ->addMethodCall('addMethod', 'markdown', '*markdown::format');
-
         $this->ifModule('Cache', function()use($app) {
             $app->getBlueprint('markdown')
                     ->setArguments('&cache');
