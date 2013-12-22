@@ -53,7 +53,7 @@ class Markdown
             $formatter = $this->line_formatters[$name];
             if (is_callable($formatter)) {
                 if (is_null($pattern)) {
-                    $line = call_user_func($formatter, $line);
+                    $line = $formatter($line);
                 } else {
                     $line = preg_replace_callback($pattern, $formatter, $line);
                 }
@@ -332,7 +332,7 @@ class Markdown
         $text = $this->transformHorizontalRules($text);
 
         foreach ($this->block_formatters as $formatter) {
-            $text = call_user_func($formatter, $text);
+            $text = $formatter($text);
         }
 
         $text = $this->hashHTML($text);
