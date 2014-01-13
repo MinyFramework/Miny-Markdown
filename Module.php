@@ -25,7 +25,7 @@ class Module extends \Miny\Application\Module
 
         $this->ifModule('Templating', function()use($app) {
             $app->add('markdown_function', '\Modules\Templating\Compiler\Functions\CallbackFunction')
-                    ->setArguments('markdown', '*markdown::format', true);
+                    ->setArguments('markdown', '*markdown::format', array('is_safe' => true));
             $app->getBlueprint('template_environment')
                     ->addMethodCall('addFunction', '&markdown_function');
         });
