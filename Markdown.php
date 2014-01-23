@@ -11,7 +11,7 @@
 namespace Modules\Markdown;
 
 use InvalidArgumentException;
-use Modules\Cache\iCacheDriver;
+use Modules\Cache\AbstractCacheDriver;
 
 class Markdown
 {
@@ -69,7 +69,7 @@ class Markdown
         return $line;
     }
 
-    public function __construct(iCacheDriver $cache = NULL)
+    public function __construct(AbstractCacheDriver $cache = NULL)
     {
         $this->cache = $cache;
         $patterns    = array(
