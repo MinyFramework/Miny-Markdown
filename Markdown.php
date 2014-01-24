@@ -31,10 +31,10 @@ class Markdown
 
     public function addLineFormatter($name, $pattern, $formatter)
     {
-        if (!is_null($pattern)) {
+        if ($pattern !== null) {
             $this->line_formatter_patterns[$name] = $pattern;
         }
-        if (!is_null($formatter)) {
+        if ($formatter !== null) {
             $this->line_formatters[$name] = $formatter;
         }
     }
@@ -52,21 +52,20 @@ class Markdown
         foreach ($this->line_formatter_patterns as $name => $pattern) {
             $formatter = $this->line_formatters[$name];
             if (is_callable($formatter)) {
-                if (is_null($pattern)) {
+                if ($pattern === null) {
                     $line = $formatter($line);
                 } else {
                     $line = preg_replace_callback($pattern, $formatter, $line);
                 }
-            } else if (is_callable(array($this, $formatter))) {
+            } elseif (is_callable(array($this, $formatter))) {
                 $line = preg_replace_callback($pattern, array($this, $formatter), $line);
-            } else if (is_string($formatter)) {
+            } elseif (is_string($formatter)) {
                 $line = preg_replace($pattern, $formatter, $line);
             } else {
                 throw new InvalidArgumentException('Formatter must be callable or string.');
             }
         }
-        $line = str_replace("  \n", '<br />', $line);
-        return $line;
+        return str_replace("  \n", '<br />', $line);
     }
 
     public function __construct(AbstractCacheDriver $cache = NULL)
@@ -301,7 +300,7 @@ class Markdown
 
     private function storeHTMLBlock($matches)
     {
-        $key                     = hash('md5', $matches[1]);
+        $key                     = md5($matches[1]);
         $this->html_blocks[$key] = $matches[1];
         return "\n\n" . $key . "\n\n";
     }
