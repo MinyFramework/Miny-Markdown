@@ -33,6 +33,6 @@ class Module extends \Miny\Modules\Module
                 );
 
             }
-        )
+        );
     }
 }
