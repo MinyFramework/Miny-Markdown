@@ -11,6 +11,7 @@ namespace Modules\Markdown;
 
 use Miny\Application\BaseApplication;
 use Miny\Factory\Container;
+use Modules\Templating\Environment;
 
 class Module extends \Miny\Modules\Module
 {
@@ -25,9 +26,12 @@ class Module extends \Miny\Modules\Module
                     '\\Modules\\Templating\\Environment',
                     function (Environment $environment, Container $container) {
                         $environment->addFunction(
-                            new \Modules\Templating\Compiler\Functions\CallbackFunction('t', array(
-                                $container->get(__NAMESPACE__ . '\\Markdown', 'format', array('is_safe' => true))
-                            ))
+                            new \Modules\Templating\Compiler\Functions\CallbackFunction('markdown', array(
+                                    $container->get(__NAMESPACE__ . '\\Markdown'),
+                                    'format'
+                                ),
+                                array('is_safe' => true)
+                            )
                         );
                     }
                 );
