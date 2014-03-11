@@ -12,6 +12,8 @@ namespace Modules\Markdown;
 
 use InvalidArgumentException;
 use Modules\Cache\AbstractCacheDriver;
+use Modules\Markdown\LineFormatters\AutoLinkFormatter;
+use Modules\Markdown\LineFormatters\YoutubeFormatter;
 
 class Markdown
 {
@@ -75,13 +77,11 @@ class Markdown
         $this->cache = $cache;
         $patterns    = array(
             'code'             => '/(?<!\\\)(`+)(.*?)(?<!\\\)\1/u',
-            'youtube'          => '/(?<!\\\)\[youtube\]\((.+?)(?<!\\\)\)/u',
             'image'            => '/(?<!\\\)!\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
             'image_definition' => '/(?<!\\\)!\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
             'link'             => '/(?<!\\\)\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
             'link_definition'  => '/(?<!\\\)\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
             'autoemail'        => '/(?<!\\\)<(\w+@(\w+[.])*\w+)>/u',
-            'autolink'         => '/(?<!\\\)<((?:http|https|ftp):\/\/.*?)(?<!\\\)>/u',
             'bold'             => '/(?<!\\\)(\*\*|__)(.+?)(?<!\\\)\1/u',
             'itallic'          => '/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u'
         );
@@ -92,11 +92,10 @@ class Markdown
             'link'             => __NAMESPACE__ . '\MarkdownUtils::insertLink',
             'link_definition'  => array($this, 'insertLinkDefinition'),
             'autoemail'        => __NAMESPACE__ . '\MarkdownUtils::insertEmail',
-            'autolink'         => __NAMESPACE__ . '\MarkdownUtils::insertLink',
             'bold'             => '<strong>$2</strong>',
             'itallic'          => '<em>$2</em>',
-            'youtube'          => '<div class="youtubeWrapper"><iframe class="youtube" src="http://www.youtube.com/embed/$1" frameborder="0" allowfullscreen></iframe></div>'
         );
+
         foreach ($patterns as $name => $pattern) {
             $this->addLineFormatter($name, $pattern, $formatters[$name]);
         }
