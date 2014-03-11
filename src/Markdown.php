@@ -12,8 +12,7 @@ namespace Modules\Markdown;
 
 use InvalidArgumentException;
 use Modules\Cache\AbstractCacheDriver;
-use Modules\Markdown\LineFormatters\AutoLinkFormatter;
-use Modules\Markdown\LineFormatters\YoutubeFormatter;
+use Modules\Markdown\LineFormatters\StandardFormatters;
 
 class Markdown
 {
@@ -21,25 +20,18 @@ class Markdown
      * @var AbstractCacheDriver
      */
     private $cache;
-    protected $line_formatter_patterns = array();
-    protected $line_formatters = array();
     protected $block_formatters = array();
+
+    /**
+     * @var AbstractMarkdownLineFormatter[]
+     */
+    protected $formatters = array();
     protected $links = array();
     protected $html_blocks = array();
 
-    private function escapeSpan($matches)
+    public function addLineFormatter(AbstractMarkdownLineFormatter $formatter)
     {
-        return MarkdownUtils::escape($matches[1]);
-    }
-
-    public function addLineFormatter($name, $pattern, $formatter)
-    {
-        if ($pattern !== null) {
-            $this->line_formatter_patterns[$name] = $pattern;
-        }
-        if ($formatter !== null) {
-            $this->line_formatters[$name] = $formatter;
-        }
+        array_unshift($this->formatters, $formatter);
     }
 
     public function addBlockFormatter($formatter)
@@ -52,21 +44,12 @@ class Markdown
 
     public function formatLine($line)
     {
-        foreach ($this->line_formatter_patterns as $name => $pattern) {
-            $formatter = $this->line_formatters[$name];
-            if (is_callable($formatter)) {
-                if ($pattern === null) {
-                    $line = $formatter($line);
-                } else {
-                    $line = preg_replace_callback($pattern, $formatter, $line);
-                }
-            } elseif (is_callable(array($this, $formatter))) {
-                $line = preg_replace_callback($pattern, array($this, $formatter), $line);
-            } elseif (is_string($formatter)) {
-                $line = preg_replace($pattern, $formatter, $line);
-            } else {
-                throw new InvalidArgumentException('Formatter must be callable or string.');
-            }
+        foreach ($this->formatters as $formatter) {
+            $line = preg_replace_callback(
+                $formatter->getPattern(),
+                array($formatter, 'format'),
+                $line
+            );
         }
 
         return str_replace("\n", '<br />', $line);
@@ -75,30 +58,8 @@ class Markdown
     public function __construct(AbstractCacheDriver $cache = null)
     {
         $this->cache = $cache;
-        $patterns    = array(
-            'code'             => '/(?<!\\\)(`+)(.*?)(?<!\\\)\1/u',
-            'image'            => '/(?<!\\\)!\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
-            'image_definition' => '/(?<!\\\)!\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
-            'link'             => '/(?<!\\\)\[(.+?)(?<!\\\)\]\((.+?)(?:\s+"(.*?)")?(?<!\\\)\)/u',
-            'link_definition'  => '/(?<!\\\)\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]/u',
-            'autoemail'        => '/(?<!\\\)<(\w+@(\w+[.])*\w+)>/u',
-            'bold'             => '/(?<!\\\)(\*\*|__)(.+?)(?<!\\\)\1/u',
-            'itallic'          => '/(?<!\\\)(\*|_)(.+?)(?<!\\\)\1/u'
-        );
-        $formatters  = array(
-            'code'             => __NAMESPACE__ . '\MarkdownUtils::insertCode',
-            'image'            => __NAMESPACE__ . '\MarkdownUtils::insertImage',
-            'image_definition' => array($this, 'insertImageDefinition'),
-            'link'             => __NAMESPACE__ . '\MarkdownUtils::insertLink',
-            'link_definition'  => array($this, 'insertLinkDefinition'),
-            'autoemail'        => __NAMESPACE__ . '\MarkdownUtils::insertEmail',
-            'bold'             => '<strong>$2</strong>',
-            'itallic'          => '<em>$2</em>',
-        );
 
-        foreach ($patterns as $name => $pattern) {
-            $this->addLineFormatter($name, $pattern, $formatters[$name]);
-        }
+        $this->addLineFormatter(new StandardFormatters());
 
         $this->block_formatters = array(
             array($this, 'transformLists'),
@@ -107,65 +68,6 @@ class Markdown
         );
     }
 
-    private function insertLinkDefinition($matches)
-    {
-        if (empty($matches[2])) {
-            if (isset($this->links[$matches[1]])) {
-                $link = $this->links[$matches[1]];
-            }
-        } elseif (isset($this->links[$matches[2]])) {
-            $link = $this->links[$matches[2]];
-        }
-        if (!isset($link)) {
-            //not a definition
-            return $matches[0];
-        }
-        $link[1] = $matches[1];
-
-        return MarkdownUtils::insertLink($link);
-    }
-
-    private function insertImageDefinition($matches)
-    {
-        if (empty($matches[2])) {
-            if (isset($this->links[$matches[1]])) {
-                $link = $this->links[$matches[1]];
-            }
-        } elseif (isset($this->links[$matches[2]])) {
-            $link = $this->links[$matches[2]];
-        }
-
-        if (!isset($link)) {
-            //not a definition
-            return $matches[0];
-        }
-        $link[1] = $matches[1];
-
-        return MarkdownUtils::insertImage($link);
-    }
-
-    private function collectLinkDefinition($matches)
-    {
-        $arr = array(
-            2 => preg_replace(
-                array(
-                    '/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/',
-                    '#<(?![a-z/?\$!])#'
-                ),
-                array(
-                    '&amp;',
-                    '&lt;'
-                ),
-                $matches[2]
-            )
-        ); //url
-        if (isset($matches[3])) {
-            $arr[3] = str_replace('"', '&quot;', $matches[3]); //title
-        }
-        $this->links[$matches[1]] = $arr;
-
-        return '';
-    }
 
     private function prepare($text)
     {
@@ -178,11 +80,11 @@ class Markdown
         $text = preg_replace('/^\s*$/mu', '', $text);
         $text = $this->hashHTML($text);
 
-        return preg_replace_callback(
-            '/^[ ]{0,3}\[(.*)\]:[ ]*\n?[ ]*<?(\S+?)>?[ ]*\n?[ ]*(?:(?<=\s)["(](.*?)[")][ ]*)?(?:\n+|\Z)/mu',
-            array($this, 'collectLinkDefinition'),
-            $text
-        );
+        foreach ($this->formatters as $formatter) {
+            $text = $formatter->prepare($text);
+        }
+
+        return $text;
     }
 
     private function callbackHeader($str, $level)
@@ -210,9 +112,17 @@ class Markdown
 
     private function transformHeaders($text)
     {
-        $text = preg_replace_callback('/^(.+)[ ]*\n(=|-)+[ ]*\n+/mu', array($this, 'callbackInsertSetexHeader'), $text);
+        $text = preg_replace_callback(
+            '/^(.+)[ ]*\n(=|-)+[ ]*\n+/mu',
+            array($this, 'callbackInsertSetexHeader'),
+            $text
+        );
 
-        return preg_replace_callback('/^(#{1,6})\s*(.+?)\s*#*\n+/mu', array($this, 'callbackInsertHeader'), $text);
+        return preg_replace_callback(
+            '/^(#{1,6})\s*(.+?)\s*#*\n+/mu',
+            array($this, 'callbackInsertHeader'),
+            $text
+        );
     }
 
     private function transformHorizontalRules($text)
@@ -226,9 +136,8 @@ class Markdown
     private function transformLists($text)
     {
         $lists_pattern = '/^(([ ]{0,3}((?:[*+-]|\d+[.]))[ ]+)(?s:.+?)(\z|\n{2,}(?=\S)(?![ ]*(?:[*+-]|\d+[.])[ ]+)))/mu';
-        $callback      = array($this, 'transformListsCallback');
 
-        return preg_replace_callback($lists_pattern, $callback, $text);
+        return preg_replace_callback($lists_pattern, array($this, 'transformListsCallback'), $text);
     }
 
     private function transformListsCallback($matches)
@@ -278,9 +187,12 @@ class Markdown
     private function transformCodeBlocks($text)
     {
         $code_block_pattern = '/(?:\n\n|\A)((?:(?:[ ]{4}).*\n*)+)((?=^[ ]{0,4}\S)|$)/mu';
-        $callback           = array($this, 'transformCodeBlocksCallback');
 
-        return preg_replace_callback($code_block_pattern, $callback, $text);
+        return preg_replace_callback(
+            $code_block_pattern,
+            array($this, 'transformCodeBlocksCallback'),
+            $text
+        );
     }
 
     private function trimBlockQuotePre($matches)
@@ -292,7 +204,11 @@ class Markdown
     {
         $matches[1] = preg_replace('/^[ ]*>[ ]?/', '', $matches[1]);
         $matches[1] = '  ' . $matches[1];
-        $matches[1] = preg_replace_callback('#\s*<pre>.+?</pre>#s', array($this, 'trimBlockQuotePre'), $matches[1]);
+        $matches[1] = preg_replace_callback(
+            '#\s*<pre>.+?</pre>#s',
+            array($this, 'trimBlockQuotePre'),
+            $matches[1]
+        );
 
         return sprintf("<blockquote>\n%s\n</blockquote>\n\n", $matches[1]);
     }
@@ -300,9 +216,12 @@ class Markdown
     private function transformBlockQuotes($text)
     {
         $block_quote_pattern = '/((^[ ]*>[ ]?.+\n(.+\n)*(?:\n)*)+)/mu';
-        $callback            = array($this, 'transformBlockQuotesCallback');
 
-        return preg_replace_callback($block_quote_pattern, $callback, $text);
+        return preg_replace_callback(
+            $block_quote_pattern,
+            array($this, 'transformBlockQuotesCallback'),
+            $text
+        );
     }
 
     private function makeParagraphs($text)
@@ -342,10 +261,8 @@ class Markdown
             '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#mux'
         );
 
-        $callback = array($this, 'storeHTMLBlock');
-
         foreach ($html_patterns as $pattern) {
-            $text = preg_replace_callback($pattern, $callback, $text);
+            $text = preg_replace_callback($pattern, array($this, 'storeHTMLBlock'), $text);
         }
 
         return $text;

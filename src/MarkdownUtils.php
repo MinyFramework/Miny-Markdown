@@ -46,7 +46,7 @@ class MarkdownUtils
 
     public static function randomize($str)
     {
-        $out = '';
+        $out    = '';
         $strlen = strlen($str);
         for ($i = 0; $i < $strlen; $i++) {
             switch (rand(0, 2)) {
@@ -61,44 +61,8 @@ class MarkdownUtils
                     break;
             }
         }
+
         return $out;
-    }
-
-    public static function insertCode($matches)
-    {
-        return '<code>' . self::escape(htmlspecialchars($matches[2])) . '</code>';
-    }
-
-    public static function insertEmail($matches)
-    {
-        $mail = self::randomize($matches[1]);
-        $mailto = self::randomize('mailto:' . $matches[1]);
-        return sprintf('<a href="%s">%s</a>', $mailto, $mail);
-    }
-
-    public static function insertLink($matches)
-    {
-        if (isset($matches[3])) {
-            return sprintf('<a href="%s" title="%s">%s</a>', self::escape($matches[2]), self::escape($matches[3]),
-                            $matches[1]);
-        } else {
-            if (isset($matches[2])) {
-                $href = self::escape($matches[2]);
-            } else {
-                $href = self::escape($matches[1]);
-            }
-            return sprintf('<a href="%s">%s</a>', $href, $matches[1]);
-        }
-    }
-
-    public static function insertImage($matches)
-    {
-        $matches = array_map('self::escape', $matches);
-        if (isset($matches[3])) {
-            return sprintf('<img src="%s" title="%s" alt="%s" />', $matches[2], $matches[3], $matches[1]);
-        } else {
-            return sprintf('<img src="%s" alt="%s" />', $matches[2], $matches[1]);
-        }
     }
 
 }

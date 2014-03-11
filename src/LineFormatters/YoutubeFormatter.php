@@ -10,7 +10,9 @@
 
 namespace Modules\Markdown\LineFormatters;
 
-class YoutubeFormatter
+use Modules\Markdown\AbstractMarkdownLineFormatter;
+
+class YoutubeFormatter extends AbstractMarkdownLineFormatter
 {
 
     public function getPattern()
