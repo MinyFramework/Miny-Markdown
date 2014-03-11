@@ -67,7 +67,7 @@ class Markdown
             }
         }
 
-        return str_replace("  \n", '<br />', $line);
+        return str_replace("\n", '<br />', $line);
     }
 
     public function __construct(AbstractCacheDriver $cache = null)
