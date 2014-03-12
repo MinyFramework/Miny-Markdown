@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of the Miny framework.
  * This is the reimplementation of Markdown, originally written by John Gruber (http://daringfireball.net/)
@@ -9,7 +10,7 @@
 
 namespace Modules\Markdown;
 
-abstract class AbstractMarkdownLineFormatter
+abstract class AbstractLineFormatter extends AbstractBlockFormatter
 {
     public function prepare($text)
     {
@@ -17,6 +18,4 @@ abstract class AbstractMarkdownLineFormatter
     }
 
     abstract public function getPattern();
-
-    abstract public function format($matches);
 }

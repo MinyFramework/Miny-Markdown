@@ -10,7 +10,6 @@
 
 namespace Modules\Markdown;
 
-use Modules\Cache\AbstractCacheDriver;
 use Modules\Markdown\BlockFormatters\BlockQuoteFormatter;
 use Modules\Markdown\BlockFormatters\CodeBlockFormatter;
 use Modules\Markdown\BlockFormatters\HeadingFormatter;
@@ -18,27 +17,38 @@ use Modules\Markdown\BlockFormatters\HorizontalRuleFormatter;
 use Modules\Markdown\BlockFormatters\ListFormatter;
 use Modules\Markdown\BlockFormatters\ParagraphFormatter;
 use Modules\Markdown\LineFormatters\StandardFormatters;
+use OutOfBoundsException;
 
 class Markdown
 {
-    /**
-     * @var AbstractCacheDriver
-     */
-    private $cache;
-
     /**
      * @var AbstractBlockFormatter[]
      */
     protected $blockFormatters = array();
 
     /**
-     * @var AbstractMarkdownLineFormatter[]
+     * @var AbstractLineFormatter[]
      */
     protected $lineFormatters = array();
     protected $links = array();
     protected $htmlBlocks = array();
 
-    public function addLineFormatter(AbstractMarkdownLineFormatter $formatter)
+    public function escape($str)
+    {
+        return addcslashes($str, '\\`*_{}[]()#+\'-.!');
+    }
+
+    public function unescape($str)
+    {
+        return stripslashes($str);
+    }
+
+    public function outdent($text)
+    {
+        return preg_replace('/^([ ]{1,4})/m', '', $text);
+    }
+
+    public function addLineFormatter(AbstractLineFormatter $formatter)
     {
         array_unshift($this->lineFormatters, $formatter);
     }
@@ -48,11 +58,9 @@ class Markdown
         array_unshift($this->blockFormatters, $formatter);
     }
 
-    public function __construct(AbstractCacheDriver $cache = null)
+    public function __construct()
     {
-        $this->cache = $cache;
-
-        $this->addLineFormatter(new StandardFormatters());
+        $this->addLineFormatter(new StandardFormatters($this));
 
         $this->addBlockFormatter(new ParagraphFormatter($this));
         $this->addBlockFormatter(new BlockQuoteFormatter($this));
@@ -72,7 +80,7 @@ class Markdown
             );
         }
 
-        return str_replace("\n", '<br />', $line);
+        return nl2br($line);
     }
 
     public function formatBlock($text)
@@ -84,14 +92,6 @@ class Markdown
         return $text;
     }
 
-    public function storeHTMLBlock($matches)
-    {
-        $key                     = md5($matches[1]);
-        $this->htmlBlocks[$key] = $matches[1];
-
-        return "\n\n" . $key . "\n\n";
-    }
-
     public function hasHtml($key)
     {
         return isset($this->htmlBlocks[$key]);
@@ -100,20 +100,27 @@ class Markdown
     public function getHtml($key)
     {
         if (!isset($this->htmlBlocks[$key])) {
-            throw new \OutOfBoundsException(sprintf('HTML block "%s" is not found.', $key));
+            throw new OutOfBoundsException(sprintf('HTML block "%s" is not found.', $key));
         }
 
         return $this->htmlBlocks[$key];
     }
 
+    public function storeHTMLBlock($matches)
+    {
+        $key                    = md5($matches[1]);
+        $this->htmlBlocks[$key] = $matches[1];
+
+        return "\n\n" . $key . "\n\n";
+    }
+
     public function hashHTML($text)
     {
-        $block_tags_a = 'p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
-        $block_tags_b = 'p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math';
+        $block_tags = 'p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math';
 
         $html_patterns = array(
-            '#(^<(' . $block_tags_a . ')\b(.*\n)*?</\2>[ \t]*(?=\n+|\Z))#mux',
-            '#(^<(' . $block_tags_b . ')\b(.*\n)*?.*</\2>[ \t]*(?=\n+|\Z))#mux',
+            '#(^<(' . $block_tags . '|ins|del)\b(.*\n)*?</\2>[ \t]*(?=\n+|\Z))#mux',
+            '#(^<(' . $block_tags . ')\b(.*\n)*?.*</\2>[ \t]*(?=\n+|\Z))#mux',
             '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}<(hr)\b([^<>])*?/?>[ \t]*(?=\n{2,}|\Z))#mux',
             '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#mux'
         );
@@ -145,23 +152,10 @@ class Markdown
 
     public function format($text)
     {
-        if ($this->cache !== null) {
-            $cache_key = sha1($text);
-            if ($this->cache->has($cache_key)) {
-                return $this->cache->get($cache_key);
-            }
-        }
-
-        $this->links       = array();
+        $this->links      = array();
         $this->htmlBlocks = array();
-        $text              = $this->prepare($text);
-        $formatted         = $this->formatBlock($text);
-        $unescaped         = MarkdownUtils::unescape($formatted);
-
-        if ($this->cache !== null) {
-            $this->cache->store($cache_key, $unescaped, 24 * 60 * 60 * 7 * 52);
-        }
-
-        return $unescaped;
+        $text             = $this->prepare($text);
+        $formatted        = $this->formatBlock($text);
+        return $this->unescape($formatted);
     }
 }

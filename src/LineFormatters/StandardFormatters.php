@@ -10,15 +10,15 @@
 
 namespace Modules\Markdown\LineFormatters;
 
-use Modules\Markdown\AbstractMarkdownLineFormatter;
-use Modules\Markdown\MarkdownUtils;
+use Modules\Markdown\AbstractLineFormatter;
+use Modules\Markdown\Markdown;
 
-class StandardFormatters extends AbstractMarkdownLineFormatter
+class StandardFormatters extends AbstractLineFormatter
 {
     private $formatters;
     private $links;
 
-    public function __construct()
+    public function __construct(Markdown $markdown)
     {
         $this->formatters = array(
             1  => array($this, 'formatCode'),
@@ -31,6 +31,7 @@ class StandardFormatters extends AbstractMarkdownLineFormatter
             15 => array($this, 'formatBold'),
             17 => array($this, 'formatItalic'),
         );
+        parent::__construct($markdown);
     }
 
     private function collectLinkDefinition($matches)
@@ -47,9 +48,10 @@ class StandardFormatters extends AbstractMarkdownLineFormatter
                 ),
                 $matches[2]
             )
-        ); //url
+        );
+        //url
         if (isset($matches[3])) {
-            $arr[3] = str_replace('"', '&quot;', $matches[3]); //title
+            $arr[3] = strtr($matches[3], '"', '&quot;'); //title
         }
         $this->links[$matches[1]] = $arr;
 
@@ -83,12 +85,14 @@ class StandardFormatters extends AbstractMarkdownLineFormatter
 
     public function formatCode($matches, $base)
     {
-        return '<code>' . MarkdownUtils::escape(htmlspecialchars($matches[$base + 1])) . '</code>';
+        $code = htmlspecialchars($matches[$base + 1]);
+
+        return sprintf('<code>%s</code>', $this->getFormatter()->escape($code));
     }
 
     public function formatImage($matches, $base)
     {
-        $matches = array_map(__NAMESPACE__ . '\\MarkdownUtils::escape', $matches);
+        $matches = array_map(array($this->getFormatter(), 'escape'), $matches);
         if (isset($matches[$base + 2])) {
             return sprintf(
                 '<img src="%s" title="%s" alt="%s" />',
@@ -122,21 +126,22 @@ class StandardFormatters extends AbstractMarkdownLineFormatter
 
     public function formatLink($matches, $base)
     {
+        $markdown = $this->getFormatter();
         if (isset($matches[$base + 2])) {
             return sprintf(
                 '<a href="%s" title="%s">%s</a>',
-                MarkdownUtils::escape($matches[$base + 1]),
-                MarkdownUtils::escape($matches[$base + 2]),
+                $markdown->escape($matches[$base + 1]),
+                $markdown->escape($matches[$base + 2]),
                 $matches[1]
             );
         } else {
             if ($matches[$base + 1] !== '') {
-                $href = MarkdownUtils::escape($matches[$base + 1]);
+                $href = $matches[$base + 1];
             } else {
-                $href = MarkdownUtils::escape($matches[$base]);
+                $href = $matches[$base];
             }
 
-            return sprintf('<a href="%s">%s</a>', $href, $matches[$base]);
+            return sprintf('<a href="%s">%s</a>', $markdown->escape($href), $matches[$base]);
         }
     }
 
@@ -155,22 +160,22 @@ class StandardFormatters extends AbstractMarkdownLineFormatter
         }
         $link[1] = $matches[$base];
 
-        return MarkdownUtils::insertLink($link);
+        return $this->formatLink($link, 0);
     }
 
     public function formatAutoLink($matches, $base)
     {
         return sprintf(
             '<a href="%s">%s</a>',
-            MarkdownUtils::escape($matches[$base]),
+            $this->getFormatter()->escape($matches[$base]),
             $matches[$base]
         );
     }
 
     public function formatAutoEmail($matches, $base)
     {
-        $mail   = MarkdownUtils::randomize($matches[$base]);
-        $mailTo = MarkdownUtils::randomize('mailto:' . $matches[$base]);
+        $mail   = $this->randomize($matches[$base]);
+        $mailTo = $this->randomize('mailto:' . $matches[$base]);
 
         return sprintf('<a href="%s">%s</a>', $mailTo, $mail);
     }
@@ -185,11 +190,30 @@ class StandardFormatters extends AbstractMarkdownLineFormatter
         return sprintf('<em>%s</em>', $matches[$base + 1]);
     }
 
+    private function randomize($str)
+    {
+        $out    = '';
+        $strLen = strlen($str);
+        for ($i = 0; $i < $strLen; $i++) {
+            switch (rand(0, 2)) {
+                case 0:
+                    $out .= '&#' . ord($str[$i]) . ';';
+                    break;
+                case 1:
+                    $out .= $str[$i];
+                    break;
+                case 2:
+                    $out .= '&#x' . dechex(ord($str[$i])) . ';';
+                    break;
+            }
+        }
+
+        return $out;
+    }
+
     public function format($matches)
     {
-        for ($i = 1; '' === $matches[$i]; ++$i) {
-            ;
-        }
+        for ($i = 1; '' === $matches[$i]; ++$i) ;
 
         return $this->formatters[$i]($matches, $i);
     }

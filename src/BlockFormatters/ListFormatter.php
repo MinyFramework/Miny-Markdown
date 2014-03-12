@@ -11,7 +11,6 @@
 namespace Modules\Markdown\BlockFormatters;
 
 use \Modules\Markdown\AbstractBlockFormatter;
-use Modules\Markdown\MarkdownUtils;
 
 class ListFormatter extends AbstractBlockFormatter {
 
@@ -42,9 +41,9 @@ class ListFormatter extends AbstractBlockFormatter {
         $markdown = $this->getFormatter();
 
         if ($leading_line || (strpos($item, "\n\n") !== false)) {
-            $item = $markdown->formatBlock(MarkdownUtils::outdent($item));
+            $item = $markdown->formatBlock($markdown->outdent($item));
         } else {
-            $item = $this->format(MarkdownUtils::outdent($item));
+            $item = $this->format($markdown->outdent($item));
             $item = $markdown->formatLine(rtrim($item));
         }
 

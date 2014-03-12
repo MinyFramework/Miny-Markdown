@@ -14,7 +14,8 @@ abstract class AbstractBlockFormatter
 {
     private $markdown;
 
-    public function __construct(Markdown $markdown) {
+    public function __construct(Markdown $markdown)
+    {
         $this->markdown = $markdown;
     }
 

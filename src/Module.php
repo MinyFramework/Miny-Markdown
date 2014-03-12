@@ -12,6 +12,7 @@ namespace Modules\Markdown;
 use Miny\Application\BaseApplication;
 use Miny\Factory\Container;
 use Modules\Markdown\LineFormatters\YoutubeFormatter;
+use Modules\Templating\Compiler\Functions\CallbackFunction;
 use Modules\Templating\Environment;
 
 class Module extends \Miny\Modules\Module
@@ -24,7 +25,17 @@ class Module extends \Miny\Modules\Module
         $container->addCallback(
             '\\Modules\\Markdown\\Markdown',
             function (Markdown $markdown) {
-                $markdown->addLineFormatter(new YoutubeFormatter());
+                $markdown->addLineFormatter(new YoutubeFormatter($markdown));
+            }
+        );
+
+        $this->ifModule(
+            'Cache',
+            function () use ($container) {
+                $container->addAlias(
+                    '\\Modules\\Markdown\\Markdown',
+                    '\\Modules\\Markdown\\CachedMarkdown'
+                );
             }
         );
 
@@ -35,7 +46,7 @@ class Module extends \Miny\Modules\Module
                     '\\Modules\\Templating\\Environment',
                     function (Environment $environment, Container $container) {
                         $environment->addFunction(
-                            new \Modules\Templating\Compiler\Functions\CallbackFunction('markdown', array(
+                            new CallbackFunction('markdown', array(
                                     $container->get(__NAMESPACE__ . '\\Markdown'),
                                     'format'
                                 ),
