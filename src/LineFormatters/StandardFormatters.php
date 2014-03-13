@@ -71,15 +71,15 @@ class StandardFormatters extends AbstractLineFormatter
     public function getPattern()
     {
         return '/(?<!\\\)(?:
-        (`+)(.*?)(?<!\\\)\1                                 # code              1, 2
-        |!\[(.+?)(?<!\\\)\]\((.+?)(?:|\s+"(.*?)")(?<!\\\)\) # image             3, 4, 5
-        |!\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\] # image definition  6, 7
-        |\[(.+?)(?<!\\\)\]\((.+?)(?:|\s+"(.*?)")(?<!\\\)\)  # link              8, 9, 10
-        |\[(.*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[(.*?)(?<!\\\)\]  # link definition   11, 12
-        |<((?:http|https|ftp):\/\/.*?)(?<!\\\)>             # auto link         13
-        |<(\w+@(?:\w+[.])*\w+)>                             # auto email        14
-        |(\*\*|__)(.+?)(?<!\\\)\15                          # bold              15, 16
-        |(\*|_)(.+?)(?<!\\\)\17                             # italic            17, 18
+        (`+)(.*?)(?<!\\\)\1                                         # code              1, 2
+        |!\[([^\]]+?)(?<!\\\)\]\((.+?)(?:|\s+"(.*?)")(?<!\\\)\)     # image             3, 4, 5
+        |!\[([^\]]*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[([^\]]*?)(?<!\\\)\] # image definition  6, 7
+        |\[([^\]]+?)(?<!\\\)\]\((.+?)(?:|\s+"([^\]]*?)")(?<!\\\)\)  # link              8, 9, 10
+        |\[([^\]]+?)(?<!\\\)\]\s{0,1}(?<!\\\)\[([^\]]*?)(?<!\\\)\]  # link definition   11, 12
+        |<((?:http|https|ftp):\/\/.*?)(?<!\\\)>                     # auto link         13
+        |<(\w+@(?:\w+[.])*\w+)>                                     # auto email        14
+        |(\*\*|__)(.+?)(?<!\\\)\15                                  # bold              15, 16
+        |(\*|_)(.+?)(?<!\\\)\17                                     # italic            17, 18
         )/xu';
     }
 
@@ -108,11 +108,11 @@ class StandardFormatters extends AbstractLineFormatter
     public function formatImageDefinition($matches, $base)
     {
         if (isset($matches[$base + 1])) {
-            if (isset($this->links[$matches[$base]])) {
-                $link = $this->links[$matches[$base]];
+            if (isset($this->links[$matches[$base + 1]])) {
+                $link = $this->links[$matches[$base + 1]];
             }
-        } elseif (isset($this->links[$matches[$base + 1]])) {
-            $link = $this->links[$matches[$base + 1]];
+        } elseif (isset($this->links[$matches[$base]])) {
+            $link = $this->links[$matches[$base]];
         }
 
         if (!isset($link)) {
@@ -121,7 +121,7 @@ class StandardFormatters extends AbstractLineFormatter
         }
         $link[1] = $matches[$base];
 
-        return $this->formatImage($link, 0);
+        return $this->formatImage($link, 1);
     }
 
     public function formatLink($matches, $base)
@@ -148,19 +148,20 @@ class StandardFormatters extends AbstractLineFormatter
     public function formatLinkDefinition($matches, $base)
     {
         if ($matches[$base + 1] !== '') {
-            if (isset($this->links[$matches[$base]])) {
-                $link = $this->links[$matches[$base]];
+            if (isset($this->links[$matches[$base + 1]])) {
+                $link = $this->links[$matches[$base + 1]];
             }
-        } elseif (isset($this->links[$matches[$base + 1]])) {
-            $link = $this->links[$matches[$base + 1]];
+        } elseif (isset($this->links[$matches[$base]])) {
+            $link = $this->links[$matches[$base]];
         }
+
         if (!isset($link)) {
             //not a definition
             return $matches[0];
         }
         $link[1] = $matches[$base];
 
-        return $this->formatLink($link, 0);
+        return $this->formatLink($link, 1);
     }
 
     public function formatAutoLink($matches, $base)
