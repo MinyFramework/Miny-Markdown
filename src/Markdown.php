@@ -66,8 +66,8 @@ class Markdown
         $this->addBlockFormatter(new BlockQuoteFormatter($this));
         $this->addBlockFormatter(new CodeBlockFormatter($this));
         $this->addBlockFormatter(new ListFormatter($this));
-        $this->addBlockFormatter(new HeadingFormatter($this));
         $this->addBlockFormatter(new HorizontalRuleFormatter($this));
+        $this->addBlockFormatter(new HeadingFormatter($this));
     }
 
     public function formatLine($line)
