@@ -103,26 +103,34 @@ class Markdown
             throw new OutOfBoundsException(sprintf('HTML block "%s" is not found.', $key));
         }
 
-        return $this->htmlBlocks[$key];
+        list($opening, $content, $closing) = $this->htmlBlocks[$key];
+
+        if ($closing === 'raw') {
+            return $content;
+        }
+
+        return '<' . $opening . '>' . $content . '</' . $closing . '>';
     }
 
     public function storeHTMLBlock($matches)
     {
-        $key                    = md5($matches[1]);
-        $this->htmlBlocks[$key] = $matches[1];
+        $key = md5($matches[0]);
+        if ($matches[1] !== 'raw') {
+            $matches[3] = $this->formatBlock($matches[3]);
+        }
+        $this->htmlBlocks[$key] = array($matches[2], $matches[3], $matches[1]);
 
         return "\n\n" . $key . "\n\n";
     }
 
     public function hashHTML($text)
     {
-        $block_tags = 'p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math';
+        $block_tags = 'raw|p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
 
         $html_patterns = array(
-            '#(^<(' . $block_tags . '|ins|del)\b(.*\n)*?</\2>[ \t]*(?=\n+|\Z))#mux',
-            '#(^<(' . $block_tags . ')\b(.*\n)*?.*</\2>[ \t]*(?=\n+|\Z))#mux',
-            '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}<(hr)\b([^<>])*?/?>[ \t]*(?=\n{2,}|\Z))#mux',
-            '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#mux'
+            '#^<((' . $block_tags . ')(?:\b.*?)?)>(.*?)</\2>#smu',
+            '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}<(hr)\b([^<>])*?/?>[ \t]*(?=\n{2,}|\Z))#mu',
+            '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#mu'
         );
 
         foreach ($html_patterns as $pattern) {
@@ -156,6 +164,7 @@ class Markdown
         $this->htmlBlocks = array();
         $text             = $this->prepare($text);
         $formatted        = $this->formatBlock($text);
+
         return $this->unescape($formatted);
     }
 }
