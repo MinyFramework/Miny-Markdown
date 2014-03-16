@@ -22,7 +22,7 @@ class BlockQuoteFormatter extends AbstractBlockFormatter
 
     private function transformBlockQuotesCallback($matches)
     {
-        $matches[1] = preg_replace('/^[ ]*>[ ]?/', '', $matches[1]);
+        $matches[1] = preg_replace('/^[ ]*>[ ]?/m', '', $matches[1]);
         $matches[1] = '  ' . $matches[1];
         $matches[1] = preg_replace_callback(
             '#\s*<pre>.+?</pre>#s',
@@ -35,10 +35,8 @@ class BlockQuoteFormatter extends AbstractBlockFormatter
 
     public function format($text)
     {
-        $block_quote_pattern = '/((^[ ]*>[ ]?.+\n(.+\n)*(?:\n)*)+)/mu';
-
         return preg_replace_callback(
-            $block_quote_pattern,
+            '/((^[ ]*>[ ]?.+\n(.+\n)*(?:\n)*)+)/mu',
             array($this, 'transformBlockQuotesCallback'),
             $text
         );
