@@ -18,10 +18,9 @@ class ParagraphFormatter extends AbstractBlockFormatter
     public function format($text)
     {
         $markdown = $this->getFormatter();
-        $text = $markdown->hashHTML($text);
+        $text     = $markdown->hashHTML($text);
 
-        $text  = preg_replace('/\\A\n+/', '', $text);
-        $text  = preg_replace('/\n+\\z/', '', $text);
+        $text  = preg_replace(array('/^\n+/', '/\n+$/'), '', $text);
         $lines = preg_split('/\n{2,}/', $text);
         foreach ($lines as &$line) {
             if (!$markdown->hasHtml($line)) {
