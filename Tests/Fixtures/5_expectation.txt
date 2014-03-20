@@ -1,0 +1,20 @@
+<p>This is a normal paragraph:</p>
+
+<pre><code>This is a code block.
+</code></pre>
+
+<hr />
+
+<p>Here is an example of AppleScript:</p>
+
+<pre><code>tell application "Foo"
+    beep
+end tell
+</code></pre>
+
+<hr />
+
+<pre><code>&lt;div class="footer"&gt;
+    &amp;copy; 2004 Foo Corporation
+&lt;/div&gt;
+</code></pre>

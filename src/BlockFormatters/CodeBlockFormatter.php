@@ -14,26 +14,29 @@ use Modules\Markdown\AbstractBlockFormatter;
 
 class CodeBlockFormatter extends AbstractBlockFormatter
 {
-    private function transformCodeBlocksCallback($matches)
-    {
-        $formatter = $this->getFormatter();
-
-        $code_html = "\n\n<pre><code>%s\n</code></pre>\n\n";
-        $matches[1] = $formatter->escape($formatter->outdent($matches[1]));
-        $matches[1] = ltrim($matches[1], "\n");
-        $matches[1] = rtrim($matches[1]);
-        $matches[1] = sprintf($code_html, $matches[1]);
-
-        return $matches[1];
-    }
 
     public function format($text)
     {
         $code_block_pattern = '/(?:\n\n|\A)((?:(?:[ ]{4}).*\n*)+)((?=^[ ]{0,4}\S)|$)/mu';
 
+        $formatter = $this->getFormatter();
+
         return preg_replace_callback(
             $code_block_pattern,
-            array($this, 'transformCodeBlocksCallback'),
+            function ($matches) use ($formatter) {
+                $text = $formatter->escape($formatter->outdent($matches[1]));
+                $text = ltrim($text, "\n");
+                $text = strtr(
+                    rtrim($text),
+                    array(
+                        '&' => '&amp;',
+                        '<' => '&lt;',
+                        '>' => '&gt;'
+                    )
+                );
+
+                return sprintf("\n\n<pre><code>%s\n</code></pre>\n\n", $text);
+            },
             $text
         );
     }

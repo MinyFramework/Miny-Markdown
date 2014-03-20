@@ -21,7 +21,8 @@ class MarkdownTest extends PHPUnit_Framework_TestCase
             array('1.txt', '1_expectation.txt'),
             array('2.txt', '2_expectation.txt'),
             array('3.txt', '3_expectation.txt'),
-            array('4.txt', '4_expectation.txt')
+            array('4.txt', '4_expectation.txt'),
+            array('5.txt', '5_expectation.txt')
         );
     }
 

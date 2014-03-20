@@ -87,7 +87,7 @@ inside a list item.</p>
 <ul>
 <li>
 <p>A list item with a code block:</p>
-<pre><code><code goes here>
+<pre><code>code goes here
 </code></pre>
 </li>
 </ul>
