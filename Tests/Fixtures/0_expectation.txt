@@ -6,3 +6,10 @@
 
 <p>Phasellus non rutrum orci. Morbi sapien ante, facilisis non ante eget, vehicula placerat lorem.<br />
 Proin auctor ipsum id risus gravida cursus. Nunc a nibh ut arcu ullamcorper pulvinar eu interdum metus. Sed tempus fringilla gravida. Cras consectetur purus felis, vel dictum risus placerat eu. Nulla laoreet libero et mollis vestibulum.</p>
+
+<p>*literal asterisks*<br />
+<em>single asterisks</em><br />
+<em>single underscores</em><br />
+<strong>double asterisks</strong><br />
+<strong>double underscores</strong><br />
+un<em>frigging</em>believable</p>

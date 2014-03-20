@@ -53,7 +53,7 @@ class StandardFormatters extends AbstractLineFormatter
         if (isset($matches[3])) {
             $arr[3] = strtr($matches[3], '"', '&quot;'); //title
         }
-        $this->links[$matches[1]] = $arr;
+        $this->links[strtolower($matches[1])] = $arr;
 
         return '';
     }
@@ -107,21 +107,20 @@ class StandardFormatters extends AbstractLineFormatter
 
     public function formatImageDefinition($matches, $base)
     {
-        if (isset($matches[$base + 1])) {
-            if (isset($this->links[$matches[$base + 1]])) {
-                $link = $this->links[$matches[$base + 1]];
-            }
-        } elseif (isset($this->links[$matches[$base]])) {
-            $link = $this->links[$matches[$base]];
+        if ($matches[$base + 1] !== '') {
+            $id = strtolower($matches[$base + 1]);
+        } else {
+            $id = strtolower($matches[$base]);
+        }
+        if (isset($this->links[$id])) {
+            $link    = $this->links[$id];
+            $link[1] = $matches[$base];
+
+            return $this->formatImage($link, 1);
         }
 
-        if (!isset($link)) {
-            //not a definition
-            return $matches[0];
-        }
-        $link[1] = $matches[$base];
-
-        return $this->formatImage($link, 1);
+        //not a definition
+        return $matches[0];
     }
 
     public function formatLink($matches, $base)
@@ -148,20 +147,19 @@ class StandardFormatters extends AbstractLineFormatter
     public function formatLinkDefinition($matches, $base)
     {
         if ($matches[$base + 1] !== '') {
-            if (isset($this->links[$matches[$base + 1]])) {
-                $link = $this->links[$matches[$base + 1]];
-            }
-        } elseif (isset($this->links[$matches[$base]])) {
-            $link = $this->links[$matches[$base]];
+            $id = strtolower($matches[$base + 1]);
+        } else {
+            $id = strtolower($matches[$base]);
+        }
+        if (isset($this->links[$id])) {
+            $link    = $this->links[$id];
+            $link[1] = $matches[$base];
+
+            return $this->formatLink($link, 1);
         }
 
-        if (!isset($link)) {
-            //not a definition
-            return $matches[0];
-        }
-        $link[1] = $matches[$base];
-
-        return $this->formatLink($link, 1);
+        //not a definition
+        return $matches[0];
     }
 
     public function formatAutoLink($matches, $base)

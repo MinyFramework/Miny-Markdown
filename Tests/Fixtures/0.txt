@@ -8,3 +8,10 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras faucibus adipiscin
 
 Phasellus non rutrum orci. Morbi sapien ante, facilisis non ante eget, vehicula placerat lorem.
 Proin auctor ipsum id risus gravida cursus. Nunc a nibh ut arcu ullamcorper pulvinar eu interdum metus. Sed tempus fringilla gravida. Cras consectetur purus felis, vel dictum risus placerat eu. Nulla laoreet libero et mollis vestibulum.
+
+\*literal asterisks\*
+*single asterisks*
+_single underscores_
+**double asterisks**
+__double underscores__
+un*frigging*believable
