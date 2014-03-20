@@ -26,9 +26,9 @@ class MarkdownTest extends PHPUnit_Framework_TestCase
      */
     public function testStandardFormatters($source, $expectation)
     {
-        $result = $this->markdown->format(file_get_contents('Fixtures/' . $source));
+        $result = $this->markdown->format(file_get_contents(__DIR__ . '/Fixtures/' . $source));
 
-        $expected = file_get_contents('Fixtures/' . $expectation);
+        $expected = file_get_contents(__DIR__ . '/Fixtures/' . $expectation);
 
         $this->assertEquals($expected, $result . "\n");
     }
