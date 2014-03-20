@@ -27,7 +27,7 @@ class HeadingFormatter extends AbstractBlockFormatter
         return $this->callbackHeader($matches[2], strlen($matches[1]));
     }
 
-    private function callbackInsertSetexHeader($matches)
+    private function callbackInsertSetextHeader($matches)
     {
         switch ($matches[2]) {
             case '=':
@@ -43,14 +43,14 @@ class HeadingFormatter extends AbstractBlockFormatter
     public function format($text)
     {
         $text = preg_replace_callback(
-            '/^(.+?)[ ]*\n(=|-)+[ ]*\n+/m',
-            array($this, 'callbackInsertSetexHeader'),
+            '/^(#{1,6})\s*(.+?)\s*#*\n+/m',
+            array($this, 'callbackInsertHeader'),
             $text
         );
 
         return preg_replace_callback(
-            '/^(#{1,6})\s*(.+?)\s*#*\n+/m',
-            array($this, 'callbackInsertHeader'),
+            '/^(.+?)[ ]*\n(=|-)(\2*)[ ]*\n+/m',
+            array($this, 'callbackInsertSetextHeader'),
             $text
         );
     }
