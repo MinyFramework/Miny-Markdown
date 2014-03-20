@@ -43,13 +43,13 @@ class HeadingFormatter extends AbstractBlockFormatter
     public function format($text)
     {
         $text = preg_replace_callback(
-            '/\n*(.+?)[ ]*\n(=|-)+[ ]*\n+/',
+            '/^(.+?)[ ]*\n(=|-)+[ ]*\n+/m',
             array($this, 'callbackInsertSetexHeader'),
             $text
         );
 
         return preg_replace_callback(
-            '/\n*(#{1,6})\s*(.+?)\s*#*\n+/',
+            '/^(#{1,6})\s*(.+?)\s*#*\n+/m',
             array($this, 'callbackInsertHeader'),
             $text
         );

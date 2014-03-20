@@ -105,19 +105,12 @@ class Markdown
 
         list($opening, $content, $closing) = $this->htmlBlocks[$key];
 
-        if ($closing === 'raw') {
-            return $content;
-        }
-
         return '<' . $opening . '>' . $content . '</' . $closing . '>';
     }
 
     public function storeHTMLBlock($matches)
     {
         $key = md5($matches[0]);
-        if ($matches[1] !== 'raw' && $matches[1] !== 'code') {
-            $matches[3] = $this->formatBlock($matches[3]);
-        }
         $this->htmlBlocks[$key] = array($matches[2], $matches[3], $matches[1]);
 
         return "\n\n" . $key . "\n\n";
