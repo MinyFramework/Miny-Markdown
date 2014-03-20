@@ -25,9 +25,9 @@ class ListFormatter extends AbstractBlockFormatter {
         );
 
         if (in_array($matches[3], array('*', '+', '-'))) {
-            $pattern = "<ul>%s</ul>\n";
+            $pattern = "<ul>\n%s\n</ul>\n";
         } else {
-            $pattern = "<ol>%s</ol>\n";
+            $pattern = "<ol>\n%s\n</ol>\n";
         }
 
         return sprintf($pattern, $list);
@@ -47,6 +47,7 @@ class ListFormatter extends AbstractBlockFormatter {
             $item = $markdown->formatLine(rtrim($item));
         }
 
+        $item = $this->getFormatter()->hashHTML($item);
         return sprintf("<li>%s</li>\n", $item);
     }
 

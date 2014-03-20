@@ -1,0 +1,109 @@
+<ul>
+<li>Bird</li>
+<li>Magic</li>
+</ul>
+
+<hr />
+
+<ul>
+<li>Bird</li>
+<li>Magic</li>
+</ul>
+
+<hr />
+
+<ul>
+<li>Bird</li>
+<li>Magic</li>
+</ul>
+
+<hr />
+
+<ul>
+<li>
+<p>Bird</p>
+</li>
+<li>
+<p>Magic</p>
+</li>
+</ul>
+
+<hr />
+
+<ul>
+<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.<br />
+Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi,<br />
+viverra nec, fringilla in, laoreet vitae, risus.</li>
+<li>Donec sit amet nisl. Aliquam semper ipsum sit amet velit.<br />
+Suspendisse id sem consectetuer libero luctus adipiscing.</li>
+</ul>
+
+<hr />
+
+<ul>
+<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.<br />
+Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi,<br />
+viverra nec, fringilla in, laoreet vitae, risus.</li>
+<li>Donec sit amet nisl. Aliquam semper ipsum sit amet velit.<br />
+Suspendisse id sem consectetuer libero luctus adipiscing.</li>
+</ul>
+
+<hr />
+
+<ol>
+<li>Bird</li>
+<li>McHale</li>
+<li>Parish</li>
+</ol>
+
+<hr />
+
+<ul>
+<li>
+<p>This is a list item with two paragraphs.</p>
+<p>This is the second paragraph in the list item. You're<br />
+only required to indent the first line. Lorem ipsum dolor<br />
+sit amet, consectetuer adipiscing elit.</p>
+</li>
+<li>
+<p>Another item in the same list.</p>
+</li>
+</ul>
+
+<hr />
+
+<ul>
+<li>
+<p>A list item with a blockquote:</p>
+<blockquote>
+<p>This is a blockquote<br />
+inside a list item.</p>
+</blockquote>
+</li>
+</ul>
+
+<hr />
+
+<ul>
+<li>
+<p>A list item with a code block:</p>
+<pre><code><code goes here>
+</code></pre>
+</li>
+</ul>
+
+<hr />
+
+<ul>
+<li>
+<p>A list item with a list in it:</p>
+<ul>
+<li>inner list item</li>
+<li>another item</li>
+</ul>
+</li>
+</ul>
+
+<hr />
+
+<p>1986. What a great season.</p>
