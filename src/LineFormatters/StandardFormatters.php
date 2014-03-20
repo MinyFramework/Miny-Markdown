@@ -126,21 +126,18 @@ class StandardFormatters extends AbstractLineFormatter
     public function formatLink($matches, $base)
     {
         $markdown = $this->getFormatter();
+        $linkText = $matches[$base];
+        $href     = $matches[$base + 1];
         if (isset($matches[$base + 2])) {
             return sprintf(
                 '<a href="%s" title="%s">%s</a>',
-                $markdown->escape($matches[$base + 1]),
+                $markdown->escape($href),
                 $markdown->escape($matches[$base + 2]),
-                $matches[$base]
+                $linkText
             );
         } else {
-            if ($matches[$base + 1] !== '') {
-                $href = $matches[$base + 1];
-            } else {
-                $href = $matches[$base];
-            }
 
-            return sprintf('<a href="%s">%s</a>', $markdown->escape($href), $matches[$base]);
+            return sprintf('<a href="%s">%s</a>', $markdown->escape($href), $linkText);
         }
     }
 

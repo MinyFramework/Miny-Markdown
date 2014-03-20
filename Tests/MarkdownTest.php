@@ -1,5 +1,6 @@
 <?php
 
+use Modules\Markdown\LineFormatters\YoutubeFormatter;
 use Modules\Markdown\Markdown;
 
 class MarkdownTest extends PHPUnit_Framework_TestCase
@@ -47,5 +48,24 @@ class MarkdownTest extends PHPUnit_Framework_TestCase
         // strings do not equal due to randomization
         $this->assertNotEquals($expected, $result);
         $this->assertEquals($expected, html_entity_decode($result));
+    }
+
+    public function testYoutubeFormatter()
+    {
+        $this->markdown->addLineFormatter(new YoutubeFormatter($this->markdown));
+
+        $expected = '<p><div class="youtubeWrapper">' .
+            '<iframe class="youtube" src="http://www.youtube.com/embed/id" frameborder="0" allowfullscreen>' .
+            '</iframe></div></p>';
+
+        $this->assertEquals($expected, $this->markdown->format('[youtube](id)'));
+    }
+
+    /**
+     * @expectedException OutOfBoundsException
+     */
+    public function testThatAnExceptionIsThrownWhenHTMLBlockIsNotFound()
+    {
+        $this->markdown->getHtml('some key');
     }
 }

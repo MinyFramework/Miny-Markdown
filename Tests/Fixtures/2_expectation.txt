@@ -3,7 +3,7 @@
 <a href="http://url" title="Title">link text with title</a></p>
 
 <p>I get 10 times more traffic from <a href="http://google.com/" title="Google">Google</a> than from<br />
-<a href="http://search.yahoo.com/" title="Yahoo Search">Yahoo</a> or <a href="http://search.msn.com/" title="MSN Search">MSN</a>.</p>
+<a href="http://search.yahoo.com/" title="Yahoo Search">Yahoo</a> or <a href="http://search.msn.com/" title="MSN Search">MSN</a> or [Something random][].</p>
 
 <p>Visit <a href="http://daringfireball.net/">Daring Fireball</a> for more information.</p>
 
@@ -11,4 +11,6 @@
 
 <p><img src="/path/to/img.jpg" alt="Alt text" /><br />
 <img src="/path/to/img.jpg" title="Optional title" alt="Alt text" /><br />
-<img src="url/to/image" title="Optional title attribute" alt="Alt text" /></p>
+<img src="url/to/image" title="Optional title attribute" alt="Alt text" /><br />
+<img src="url/to/image" title="Optional title attribute" alt="Image alt" /><br />
+![Not an image][]</p>
