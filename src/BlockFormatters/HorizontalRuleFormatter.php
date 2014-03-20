@@ -17,7 +17,7 @@ class HorizontalRuleFormatter extends AbstractBlockFormatter
 
     public function format($text)
     {
-        $hr_pattern  = '/^[ ]{0,2}([*_-][ ]?){3,}\s*$/m';
+        $hr_pattern  = '/^[ ]{0,2}([*_-])(?>[ ]{0,2}\1){2,}\s*$/m';
 
         return preg_replace($hr_pattern, "<hr />\n", $text);
     }
