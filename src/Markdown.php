@@ -109,6 +109,14 @@ class Markdown
             return $closing;
         }
 
+        $lines = preg_split('/\n{2,}/', $content);
+        foreach ($lines as &$line) {
+            if ($this->hasHtml($line)) {
+                $line =  $this->getHtml($line);
+            }
+        }
+        $content = implode("\n", $lines);
+
         return '<' . $opening . '>' . $content . '</' . $closing . '>';
     }
 
@@ -125,9 +133,9 @@ class Markdown
         $block_tags = 'p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
 
         $html_patterns = array(
-            '#^<((' . $block_tags . ')(?:\b.*?)?)>(.*?)</\2>#smu',
-            '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}<(hr)\b([^<>])*?/?>[ \t]*(?=\n{2,}|\Z))#mu',
-            '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#mu'
+            '#^<((' . $block_tags . ')(?:\b.*?)?)>(.*?)</\2>#sm',
+            '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}<(hr)\b([^<>])*?/?>[ \t]*(?=\n{2,}|\Z))#m',
+            '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#m'
         );
 
         foreach ($html_patterns as $pattern) {

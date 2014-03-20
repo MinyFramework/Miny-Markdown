@@ -15,29 +15,23 @@ use Modules\Markdown\AbstractBlockFormatter;
 class BlockQuoteFormatter extends AbstractBlockFormatter
 {
 
-    private function trimBlockQuotePre($matches)
-    {
-        return preg_replace('/^  /m', '', $matches[0]);
-    }
-
-    private function transformBlockQuotesCallback($matches)
-    {
-        $matches[1] = preg_replace('/^[ ]*>[ ]?/m', '', $matches[1]);
-        $matches[1] = '  ' . $matches[1];
-        $matches[1] = preg_replace_callback(
-            '#\s*<pre>.+?</pre>#s',
-            array($this, 'trimBlockQuotePre'),
-            $matches[1]
-        );
-
-        return sprintf("<blockquote>\n%s\n</blockquote>\n\n", $matches[1]);
-    }
-
     public function format($text)
     {
+        $formatter = $this->getFormatter();
+
         return preg_replace_callback(
             '/((^[ ]*>[ ]?.+\n(.+\n)*(?:\n)*)+)/mu',
-            array($this, 'transformBlockQuotesCallback'),
+            function ($matches) use ($formatter) {
+
+                // trim one level of quoting and empty lines
+                $text = preg_replace('/^[ ]*>[ ]?/m', '', $matches[1]);
+
+                // recursion to catch e.g. nested quotes
+                $text = $formatter->formatBlock($text);
+                $text = $formatter->hashHTML($text);
+
+                return sprintf("<blockquote>\n%s\n</blockquote>\n\n", $text);
+            },
             $text
         );
     }
