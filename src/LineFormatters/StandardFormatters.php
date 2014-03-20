@@ -216,6 +216,6 @@ class StandardFormatters extends AbstractLineFormatter
     {
         for ($i = 1; '' === $matches[$i]; ++$i) ;
 
-        return $this->formatters[$i]($matches, $i);
+        return call_user_func($this->formatters[$i], $matches, $i);
     }
 }
