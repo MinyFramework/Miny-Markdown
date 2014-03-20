@@ -105,6 +105,10 @@ class Markdown
 
         list($opening, $content, $closing) = $this->htmlBlocks[$key];
 
+        if($opening === 'hr') {
+            return $closing;
+        }
+
         return '<' . $opening . '>' . $content . '</' . $closing . '>';
     }
 
@@ -118,7 +122,7 @@ class Markdown
 
     public function hashHTML($text)
     {
-        $block_tags = 'raw|p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
+        $block_tags = 'p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
 
         $html_patterns = array(
             '#^<((' . $block_tags . ')(?:\b.*?)?)>(.*?)</\2>#smu',

@@ -1,0 +1,11 @@
+<h1><strong>bold</strong> header</h1>
+
+<h2>Header with <em>emphasized</em> text</h2>
+
+<p>Lorem ipsum dolor sit amet, <code>code</code> adipiscing elit.</p>
+
+<hr />
+
+<hr />
+
+<hr />

@@ -1,0 +1,13 @@
+**bold** header
+========
+
+Header with *emphasized* text
+--------
+
+Lorem ipsum dolor sit amet, `code` adipiscing elit.
+
+- - -
+
+********
+
+______

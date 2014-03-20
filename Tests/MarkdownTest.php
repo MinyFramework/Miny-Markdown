@@ -17,7 +17,9 @@ class MarkdownTest extends PHPUnit_Framework_TestCase
     public function fixtureProvider()
     {
         return array(
-            array('0.txt', '0_expectation.txt')
+            array('0.txt', '0_expectation.txt'),
+            array('1.txt', '1_expectation.txt'),
+            array('2.txt', '2_expectation.txt')
         );
     }
 
@@ -31,5 +33,16 @@ class MarkdownTest extends PHPUnit_Framework_TestCase
         $expected = file_get_contents(__DIR__ . '/Fixtures/' . $expectation);
 
         $this->assertEquals($expected, $result . "\n");
+    }
+
+    public function testMailFormatters()
+    {
+        $result = $this->markdown->format('<mail@domain.at>');
+
+        $expected = '<p><a href="mailto:mail@domain.at">mail@domain.at</a></p>';
+
+        // strings do not equal due to randomization
+        $this->assertNotEquals($expected, $result);
+        $this->assertEquals($expected, html_entity_decode($result));
     }
 }

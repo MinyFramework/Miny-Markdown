@@ -1,0 +1,6 @@
+Link formatters: <http://autolink> [link](url)
+[link](url "title")
+[link text][link_id]
+[link_id][]
+
+[link_id]: http://url

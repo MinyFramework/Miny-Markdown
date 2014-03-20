@@ -132,7 +132,7 @@ class StandardFormatters extends AbstractLineFormatter
                 '<a href="%s" title="%s">%s</a>',
                 $markdown->escape($matches[$base + 1]),
                 $markdown->escape($matches[$base + 2]),
-                $matches[1]
+                $matches[$base]
             );
         } else {
             if ($matches[$base + 1] !== '') {

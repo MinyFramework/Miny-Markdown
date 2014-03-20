@@ -1,0 +1,4 @@
+<p>Link formatters: <a href="http://autolink">http://autolink</a> <a href="url">link</a><br />
+<a href="url" title="title">link</a><br />
+<a href="http://url">link text</a><br />
+<a href="http://url">link_id</a></p>
