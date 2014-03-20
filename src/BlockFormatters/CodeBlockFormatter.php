@@ -18,7 +18,7 @@ class CodeBlockFormatter extends AbstractBlockFormatter
     {
         $formatter = $this->getFormatter();
 
-        $code_html  = "\n\n<code><pre>%s\n</pre></code>\n\n";
+        $code_html = "\n\n<pre><code>%s\n</code></pre>\n\n";
         $matches[1] = $formatter->escape($formatter->outdent($matches[1]));
         $matches[1] = ltrim($matches[1], "\n");
         $matches[1] = rtrim($matches[1]);
