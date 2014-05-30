@@ -105,14 +105,14 @@ class Markdown
 
         list($opening, $content, $closing) = $this->htmlBlocks[$key];
 
-        if($opening === 'hr') {
+        if ($opening === 'hr') {
             return $closing;
         }
 
         $lines = preg_split('/\n{2,}/', $content);
         foreach ($lines as &$line) {
             if ($this->hasHtml($line)) {
-                $line =  $this->getHtml($line);
+                $line = $this->getHtml($line);
             }
         }
         $content = implode("\n", $lines);
@@ -122,7 +122,7 @@ class Markdown
 
     public function storeHTMLBlock($matches)
     {
-        $key = md5($matches[0]);
+        $key                    = md5($matches[0]);
         $this->htmlBlocks[$key] = array($matches[2], $matches[3], $matches[1]);
 
         return "\n\n" . $key . "\n\n";
@@ -130,15 +130,15 @@ class Markdown
 
     public function hashHTML($text)
     {
-        $block_tags = 'p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
+        $blockTags = 'p|div|h[1-6]|blockquote|pre|code|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del';
 
-        $html_patterns = array(
-            '#^<((' . $block_tags . ')(?:\b.*?)?)>(.*?)</\2>#sm',
+        $htmlPatterns = array(
+            '#^<((' . $blockTags . ')(?:\b.*?)?)>(.*?)</\2>#sm',
             '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}<(hr)\b([^<>])*?/?>[ \t]*(?=\n{2,}|\Z))#m',
             '#(?:(?<=\n\n)|\A\n?)([ ]{0,3}(?s:<!(--.*?--\s*)+>)[ \t]*(?=\n{2,}|\Z))#m'
         );
 
-        foreach ($html_patterns as $pattern) {
+        foreach ($htmlPatterns as $pattern) {
             $text = preg_replace_callback($pattern, array($this, 'storeHTMLBlock'), $text);
         }
 

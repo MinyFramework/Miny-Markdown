@@ -10,9 +10,10 @@
 
 namespace Modules\Markdown\BlockFormatters;
 
-use \Modules\Markdown\AbstractBlockFormatter;
+use Modules\Markdown\AbstractBlockFormatter;
 
-class ListFormatter extends AbstractBlockFormatter {
+class ListFormatter extends AbstractBlockFormatter
+{
 
     private function transformListsCallback($matches)
     {
@@ -35,12 +36,12 @@ class ListFormatter extends AbstractBlockFormatter {
 
     private function processListItemsCallback($matches)
     {
-        $item         = $matches[4];
-        $leading_line = $matches[1];
+        $item        = $matches[4];
+        $leadingLine = $matches[1];
 
         $markdown = $this->getFormatter();
 
-        if ($leading_line || (strpos($item, "\n\n") !== false)) {
+        if ($leadingLine || (strpos($item, "\n\n") !== false)) {
             $item = $markdown->formatBlock($markdown->outdent($item));
         } else {
             $item = $this->format($markdown->outdent($item));
@@ -48,14 +49,16 @@ class ListFormatter extends AbstractBlockFormatter {
         }
 
         $item = $this->getFormatter()->hashHTML($item);
+
         return sprintf("<li>%s</li>\n", $item);
     }
 
 
-    public function format($text) {
+    public function format($text)
+    {
 
-        $lists_pattern = '/^(([ ]{0,3}((?:[*+-]|\d+[.]))[ ]+)(?s:.+?)(\z|\n{2,}(?=\S)(?![ ]*(?:[*+-]|\d+[.])[ ]+)))/mu';
+        $listsPattern = '/^(([ ]{0,3}((?:[*+-]|\d+[.]))[ ]+)(?s:.+?)(\z|\n{2,}(?=\S)(?![ ]*(?:[*+-]|\d+[.])[ ]+)))/mu';
 
-        return preg_replace_callback($lists_pattern, array($this, 'transformListsCallback'), $text);
+        return preg_replace_callback($listsPattern, array($this, 'transformListsCallback'), $text);
     }
 }

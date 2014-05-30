@@ -107,13 +107,10 @@ class StandardFormatters extends AbstractLineFormatter
 
     public function formatImageDefinition($matches, $base)
     {
-        if ($matches[$base + 1] !== '') {
-            $id = strtolower($matches[$base + 1]);
-        } else {
-            $id = strtolower($matches[$base]);
-        }
-        if (isset($this->links[$id])) {
-            $link    = $this->links[$id];
+        $definitionId = $matches[$base + 1] !== '' ? $matches[$base + 1] : $matches[$base];
+        $definitionId = strtolower($definitionId);
+        if (isset($this->links[$definitionId])) {
+            $link    = $this->links[$definitionId];
             $link[1] = $matches[$base];
 
             return $this->formatImage($link, 1);
@@ -143,13 +140,10 @@ class StandardFormatters extends AbstractLineFormatter
 
     public function formatLinkDefinition($matches, $base)
     {
-        if ($matches[$base + 1] !== '') {
-            $id = strtolower($matches[$base + 1]);
-        } else {
-            $id = strtolower($matches[$base]);
-        }
-        if (isset($this->links[$id])) {
-            $link    = $this->links[$id];
+        $definitionId = $matches[$base + 1] !== '' ? $matches[$base + 1] : $matches[$base];
+        $definitionId = strtolower($definitionId);
+        if (isset($this->links[$definitionId])) {
+            $link    = $this->links[$definitionId];
             $link[1] = $matches[$base];
 
             return $this->formatLink($link, 1);

@@ -17,12 +17,12 @@ class CodeBlockFormatter extends AbstractBlockFormatter
 
     public function format($text)
     {
-        $code_block_pattern = '/(?:\n\n|\A)((?:(?:[ ]{4}).*\n*)+)((?=^[ ]{0,4}\S)|$)/mu';
+        $codeBlockPattern = '/(?:\n\n|\A)((?:(?:[ ]{4}).*\n*)+)((?=^[ ]{0,4}\S)|$)/mu';
 
         $formatter = $this->getFormatter();
 
         return preg_replace_callback(
-            $code_block_pattern,
+            $codeBlockPattern,
             function ($matches) use ($formatter) {
                 $text = $formatter->escape($formatter->outdent($matches[1]));
                 $text = ltrim($text, "\n");
