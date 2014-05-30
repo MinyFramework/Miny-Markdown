@@ -45,14 +45,14 @@ class Module extends \Miny\Modules\Module
                 $container->addCallback(
                     '\\Modules\\Templating\\Environment',
                     function (Environment $environment, Container $container) {
+                        $markdown = $container->get(__NAMESPACE__ . '\\Markdown');
+                        $callback = array($markdown, 'format');
+                        $options  = array('is_safe' => true);
+
                         $environment->addFunction(
-                            new CallbackFunction('markdown', array(
-                                    $container->get(__NAMESPACE__ . '\\Markdown'),
-                                    'format'
-                                ),
-                                array('is_safe' => true)
-                            )
+                            new CallbackFunction('markdown', $callback, $options)
                         );
+                        $environment->addFunction(new CallbackFunction('md', $callback, $options));
                     }
                 );
 
