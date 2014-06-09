@@ -100,7 +100,7 @@ class Markdown
     public function getHtml($key)
     {
         if (!isset($this->htmlBlocks[$key])) {
-            throw new OutOfBoundsException(sprintf('HTML block "%s" is not found.', $key));
+            throw new OutOfBoundsException("HTML block \"{$key}\" is not found.");
         }
 
         list($opening, $content, $closing) = $this->htmlBlocks[$key];
@@ -117,7 +117,7 @@ class Markdown
         }
         $content = implode("\n", $lines);
 
-        return '<' . $opening . '>' . $content . '</' . $closing . '>';
+        return "<{$opening}>{$content}</{$closing}>";
     }
 
     public function storeHTMLBlock($matches)
