@@ -35,12 +35,30 @@ class Markdown
 
     public function escape($str)
     {
-        return addcslashes($str, '\\`*_{}[]()#+\'-.!');
+        return addcslashes($str, '`*_{}[]()#+\'-.!');
     }
 
     public function unescape($str)
     {
-        return stripslashes($str);
+        return strtr(
+            $str,
+            array(
+                "\\'" => "'",
+                '\*'  => '*',
+                '\_'  => '_',
+                '\{'  => '{',
+                '\}'  => '}',
+                '\['  => '[',
+                '\]'  => ']',
+                '\('  => '(',
+                '\)'  => ')',
+                '\#'  => '#',
+                '\+'  => '+',
+                '\-'  => '-',
+                '\.'  => '.',
+                '\!'  => '!',
+            )
+        );
     }
 
     public function outdent($text)
