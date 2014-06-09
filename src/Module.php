@@ -47,7 +47,8 @@ class Module extends \Miny\Modules\Module
                     function (Environment $environment, Container $container) {
                         $environment->addExtension(
                             new TemplateExtension(
-                                $container->get(__NAMESPACE__ . '\\Markdown'))
+                                $container->get(__NAMESPACE__ . '\\Markdown')
+                            )
                         );
                     }
                 );
