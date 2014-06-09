@@ -9,7 +9,7 @@
 
 namespace Modules\Markdown;
 
-use Modules\Templating\Compiler\Functions\MethodFunction;
+use Modules\Templating\Compiler\TemplateFunction;
 use Modules\Templating\Extension;
 
 class TemplateExtension extends Extension
@@ -28,17 +28,13 @@ class TemplateExtension extends Extension
 
     public function getFunctions()
     {
+        $callback  = array($this->markdown, 'format');
         $functions = array(
-            new MethodFunction('markdown', 'format', array('is_safe' => true)),
-            new MethodFunction('md', 'format', array('is_safe' => true))
+            new TemplateFunction('markdown', $callback, array('is_safe' => true)),
+            new TemplateFunction('md', $callback, array('is_safe' => true))
         );
 
         return $functions;
-    }
-
-    public function format($text)
-    {
-        return $this->markdown->format($text);
     }
 
 }
