@@ -14,4 +14,5 @@ Proin auctor ipsum id risus gravida cursus. Nunc a nibh ut arcu ullamcorper pulv
 <em>single underscores</em><br />
 <strong>double asterisks</strong><br />
 <strong>double underscores</strong><br />
-un<em>frigging</em>believable</p>
+un<em>frigging</em>believable<br />
+<code>inline code` *asterisks* \</code></p>

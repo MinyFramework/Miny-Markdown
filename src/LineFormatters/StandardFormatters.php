@@ -70,8 +70,9 @@ class StandardFormatters extends AbstractLineFormatter
 
     public function getPattern()
     {
+        //"'(?:\\\\.|[^'\\\\])*'"
         return '/(?<!\\\)(?:
-        (`+)(.*?)(?<!\\\)\1                                         # code              1, 2
+        (`+)((?:\\\\.|[^\1\\\\])*)\1                                # code              1, 2
         |!\[([^\]]+?)(?<!\\\)\]\((.+?)(?:|\s+"(.*?)")(?<!\\\)\)     # image             3, 4, 5
         |!\[([^\]]*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[([^\]]*?)(?<!\\\)\] # image definition  6, 7
         |\[([^\]]+?)(?<!\\\)\]\((.+?)(?:|\s+"([^\]]*?)")(?<!\\\)\)  # link              8, 9, 10
@@ -87,7 +88,7 @@ class StandardFormatters extends AbstractLineFormatter
     {
         $code = htmlspecialchars($matches[$base + 1]);
 
-        return sprintf('<code>%s</code>', $this->getFormatter()->escape($code));
+        return "<code>{$code}</code>";
     }
 
     public function formatImage($matches, $base)
