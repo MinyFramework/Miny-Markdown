@@ -70,17 +70,16 @@ class StandardFormatters extends AbstractLineFormatter
 
     public function getPattern()
     {
-        //"'(?:\\\\.|[^'\\\\])*'"
         return '/(?<!\\\)(?:
-        (`+)((?:\\\\.|[^\1\\\\])*)\1                                # code              1, 2
+        (`+)((?:\\\\.|[^\1\\\\])*?)\1                               # code              1, 2
         |!\[([^\]]+?)(?<!\\\)\]\((.+?)(?:|\s+"(.*?)")(?<!\\\)\)     # image             3, 4, 5
         |!\[([^\]]*?)(?<!\\\)\]\s{0,1}(?<!\\\)\[([^\]]*?)(?<!\\\)\] # image definition  6, 7
         |\[([^\]]+?)(?<!\\\)\]\((.+?)(?:|\s+"([^\]]*?)")(?<!\\\)\)  # link              8, 9, 10
         |\[([^\]]+?)(?<!\\\)\]\s{0,1}(?<!\\\)\[([^\]]*?)(?<!\\\)\]  # link definition   11, 12
         |<((?:http|https|ftp):\/\/.*?)(?<!\\\)>                     # auto link         13
         |<(\w+@(?:\w+[.])*\w+)>                                     # auto email        14
-        |(\*\*|__)(.+?)(?<!\\\)\15                                  # bold              15, 16
-        |(\*|_)(.+?)(?<!\\\)\17                                     # italic            17, 18
+        |(\*\*|\_\_)((?:\\\\.|[^\15\\\\])*?)\15                     # bold              15, 16
+        |(\*|\_)((?:\\\\.|[^\17\\\\])*?)\17                         # italic            17, 18
         )/xu';
     }
 
@@ -173,12 +172,12 @@ class StandardFormatters extends AbstractLineFormatter
 
     public function formatBold($matches, $base)
     {
-        return sprintf('<strong>%s</strong>', $matches[$base + 1]);
+        return "<strong>{$matches[$base + 1]}</strong>";
     }
 
     public function formatItalic($matches, $base)
     {
-        return sprintf('<em>%s</em>', $matches[$base + 1]);
+        return "<em>{$matches[$base + 1]}</em>";
     }
 
     private function randomize($str)
