@@ -19,7 +19,7 @@ class HeadingFormatter extends AbstractBlockFormatter
     {
         $line = $this->getFormatter()->formatLine($str);
 
-        return sprintf('<h%2$d>%1$s</h%2$d>' . "\n\n", $line, $level);
+        return "<h{$level}>{$line}</h{$level}>\n\n";
     }
 
     private function callbackInsertHeader($matches)

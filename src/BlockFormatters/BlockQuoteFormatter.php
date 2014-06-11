@@ -30,7 +30,7 @@ class BlockQuoteFormatter extends AbstractBlockFormatter
                 $text = $formatter->formatBlock($text);
                 $text = $formatter->hashHTML($text);
 
-                return sprintf("<blockquote>\n%s\n</blockquote>\n\n", $text);
+                return "<blockquote>\n{$text}\n</blockquote>\n\n";
             },
             $text
         );

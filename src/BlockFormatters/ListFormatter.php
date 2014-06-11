@@ -26,12 +26,10 @@ class ListFormatter extends AbstractBlockFormatter
         );
 
         if (in_array($matches[3], array('*', '+', '-'))) {
-            $pattern = "<ul>\n%s\n</ul>\n";
-        } else {
-            $pattern = "<ol>\n%s\n</ol>\n";
+            return "<ul>\n{$list}\n</ul>\n";
         }
 
-        return sprintf($pattern, $list);
+        return "<ol>\n{$list}\n</ol>\n";
     }
 
     private function processListItemsCallback($matches)
@@ -50,7 +48,7 @@ class ListFormatter extends AbstractBlockFormatter
 
         $item = $this->getFormatter()->hashHTML($item);
 
-        return sprintf("<li>%s</li>\n", $item);
+        return "<li>{$item}</li>\n";
     }
 
 

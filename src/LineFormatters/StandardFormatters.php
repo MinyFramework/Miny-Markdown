@@ -92,17 +92,16 @@ class StandardFormatters extends AbstractLineFormatter
 
     public function formatImage($matches, $base)
     {
-        $matches = array_map(array($this->getFormatter(), 'escape'), $matches);
+        $markdown = $this->getFormatter();
+        $alt      = $markdown->escape($matches[$base]);
+        $src      = $markdown->escape($matches[$base + 1]);
         if (isset($matches[$base + 2])) {
-            return sprintf(
-                '<img src="%s" title="%s" alt="%s" />',
-                $matches[$base + 1],
-                $matches[$base + 2],
-                $matches[$base]
-            );
-        } else {
-            return sprintf('<img src="%s" alt="%s" />', $matches[$base + 1], $matches[$base]);
+            $title = $markdown->escape($matches[$base + 2]);
+
+            return "<img src=\"{$src}\" title=\"{$title}\" alt=\"{$alt}\" />";
         }
+
+        return "<img src=\"{$src}\" alt=\"{$alt}\" />";
     }
 
     public function formatImageDefinition($matches, $base)
@@ -124,18 +123,14 @@ class StandardFormatters extends AbstractLineFormatter
     {
         $markdown = $this->getFormatter();
         $linkText = $matches[$base];
-        $href     = $matches[$base + 1];
+        $href     = $markdown->escape($matches[$base + 1]);
         if (isset($matches[$base + 2])) {
-            return sprintf(
-                '<a href="%s" title="%s">%s</a>',
-                $markdown->escape($href),
-                $markdown->escape($matches[$base + 2]),
-                $linkText
-            );
-        } else {
+            $title = $markdown->escape($matches[$base + 2]);
 
-            return sprintf('<a href="%s">%s</a>', $markdown->escape($href), $linkText);
+            return "<a href=\"{$href}\" title=\"{$title}\">{$linkText}</a>";
         }
+
+        return "<a href=\"{$href}\">{$linkText}</a>";
     }
 
     public function formatLinkDefinition($matches, $base)
@@ -155,11 +150,9 @@ class StandardFormatters extends AbstractLineFormatter
 
     public function formatAutoLink($matches, $base)
     {
-        return sprintf(
-            '<a href="%s">%s</a>',
-            $this->getFormatter()->escape($matches[$base]),
-            $matches[$base]
-        );
+        $href = $this->getFormatter()->escape($matches[$base]);
+
+        return "<a href=\"{$href}\">{$matches[$base]}</a>";
     }
 
     public function formatAutoEmail($matches, $base)
@@ -167,7 +160,7 @@ class StandardFormatters extends AbstractLineFormatter
         $mail   = $this->randomize($matches[$base]);
         $mailTo = $this->randomize('mailto:' . $matches[$base]);
 
-        return sprintf('<a href="%s">%s</a>', $mailTo, $mail);
+        return "<a href=\"{$mailTo}\">{$mail}</a>";
     }
 
     public function formatBold($matches, $base)

@@ -35,7 +35,7 @@ class CodeBlockFormatter extends AbstractBlockFormatter
                     )
                 );
 
-                return sprintf("\n\n<pre><code>%s\n</code></pre>\n\n", $text);
+                return "\n\n<pre><code>{$text}\n</code></pre>\n\n";
             },
             $text
         );
