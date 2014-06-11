@@ -12,7 +12,6 @@ namespace Modules\Markdown;
 use Miny\Application\BaseApplication;
 use Miny\Factory\Container;
 use Modules\Markdown\LineFormatters\YoutubeFormatter;
-use Modules\Templating\Compiler\Functions\CallbackFunction;
 use Modules\Templating\Environment;
 
 class Module extends \Miny\Modules\Module
