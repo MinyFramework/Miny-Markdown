@@ -2,9 +2,7 @@
 
 <h2>Header with <em>emphasized</em> text</h2>
 
-<p>Lorem ipsum dolor sit amet, <code>code</code> adipiscing elit.</p>
-
-<h1>h1</h1>
+<h1>Title <code>with</code> code</h1>
 
 <h2>h2</h2>
 
