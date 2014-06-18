@@ -11,8 +11,8 @@ namespace Modules\Markdown;
 
 use Miny\Application\BaseApplication;
 use Miny\Factory\Container;
+use Minty\Environment;
 use Modules\Markdown\LineFormatters\YoutubeFormatter;
-use Modules\Templating\Environment;
 
 class Module extends \Miny\Modules\Module
 {
@@ -42,7 +42,7 @@ class Module extends \Miny\Modules\Module
             'Templating',
             function () use ($container) {
                 $container->addCallback(
-                    '\\Modules\\Templating\\Environment',
+                    '\\Minty\\Environment',
                     function (Environment $environment, Container $container) {
                         $environment->addExtension(
                             new TemplateExtension(
