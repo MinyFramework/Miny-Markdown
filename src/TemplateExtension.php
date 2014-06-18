@@ -9,8 +9,8 @@
 
 namespace Modules\Markdown;
 
-use Modules\Templating\Compiler\TemplateFunction;
-use Modules\Templating\Extension;
+use Minty\Compiler\TemplateFunction;
+use Minty\Extension;
 
 class TemplateExtension extends Extension
 {
