@@ -14,10 +14,25 @@ use Modules\Markdown\AbstractBlockFormatter;
 
 class HeadingFormatter extends AbstractBlockFormatter
 {
+    /**
+     * @see http://www.shauninman.com/archive/2006/08/22/widont_wordpress_plugin
+     */
+    private function widont($string)
+    {
+        $string = rtrim($string);
+        $space  = strrpos($string, ' ');
+        if ($space !== false) {
+            $string = substr($string, 0, $space) . '&nbsp;' . substr($string, $space + 1);
+        }
+
+        return $string;
+    }
 
     private function callbackHeader($str, $level)
     {
-        $line = $this->getFormatter()->formatLine($str);
+        $line = $this->getFormatter()->formatLine(
+            $this->widont($str)
+        );
 
         return "<h{$level}>{$line}</h{$level}>\n\n";
     }

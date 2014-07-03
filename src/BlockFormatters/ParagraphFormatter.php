@@ -25,7 +25,7 @@ class ParagraphFormatter extends AbstractBlockFormatter
         foreach ($lines as &$line) {
             if (!$markdown->hasHtml($line)) {
                 $line = $markdown->formatLine($line) . '</p>';
-                $line = preg_replace('/^([ \t]*)/u', '<p>', $line);
+                $line = preg_replace('/^([ \t]*)/', '<p>', $line);
             } else {
                 $line = $markdown->getHtml($line);
             }

@@ -17,7 +17,7 @@ class CodeBlockFormatter extends AbstractBlockFormatter
 
     public function format($text)
     {
-        $codeBlockPattern = '/(?:\n\n|\A)((?:(?:[ ]{4}).*\n*)+)((?=^[ ]{0,4}\S)|$)/mu';
+        $codeBlockPattern = '/(?:\n\n|\A)((?:(?:[ ]{4}).*\n*)+)((?=^[ ]{0,4}\S)|$)/m';
 
         $formatter = $this->getFormatter();
 

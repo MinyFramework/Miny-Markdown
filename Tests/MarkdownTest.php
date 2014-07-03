@@ -35,6 +35,7 @@ class MarkdownTest extends PHPUnit_Framework_TestCase
         $result = $this->markdown->format(file_get_contents(__DIR__ . '/Fixtures/' . $source));
 
         $expected = file_get_contents(__DIR__ . '/Fixtures/' . $expectation);
+        $expected = strtr($expected, array("\r\n" => "\n"));
 
         $this->assertEquals($expected, $result . "\n");
     }

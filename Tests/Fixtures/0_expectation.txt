@@ -1,6 +1,6 @@
-<h1>Lorem ipsum</h1>
+<h1>Lorem&nbsp;ipsum</h1>
 
-<h2>A simple text to test</h2>
+<h2>A simple text to&nbsp;test</h2>
 
 <p>A back\slash</p>
 

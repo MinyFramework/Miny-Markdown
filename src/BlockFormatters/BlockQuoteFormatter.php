@@ -20,7 +20,7 @@ class BlockQuoteFormatter extends AbstractBlockFormatter
         $formatter = $this->getFormatter();
 
         return preg_replace_callback(
-            '/((^[ ]*>[ ]?.+\n(.+\n)*(?:\n)*)+)/mu',
+            '/((^[ ]*>[ ]?.+\n(.+\n)*(?:\n)*)+)/m',
             function ($matches) use ($formatter) {
 
                 // trim one level of quoting and empty lines

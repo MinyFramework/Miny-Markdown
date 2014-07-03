@@ -145,7 +145,7 @@ class Markdown
         $key                    = md5($matches[0]);
         $this->htmlBlocks[$key] = array($matches[2], $matches[3], $matches[1]);
 
-        return "\n\n" . $key . "\n\n";
+        return "\n\n{$key}\n\n";
     }
 
     public function hashHTML($text)
@@ -173,7 +173,7 @@ class Markdown
             "\t"   => '    ',
         );
         $text = strtr($text, $arr);
-        $text = preg_replace('/^\s*$/mu', '', $text);
+        $text = preg_replace('/^\s*$/m', '', $text);
         $text = $this->hashHTML($text);
 
         foreach ($this->lineFormatters as $formatter) {

@@ -20,7 +20,7 @@ class ListFormatter extends AbstractBlockFormatter
         $list = preg_replace('/\n{2,}/', "\n\n\n", $matches[1]);
         $list = preg_replace('/\n{2,}$/', "\n", $list);
         $list = preg_replace_callback(
-            '/(\n)?(^[ ]*)([*+-]|\d+[.])[ ]+((?s:.+?)(?:\z|\n{1,2}))(?=\n*(?:\z|\2([*+-]|\d+[.])[ ]+))/mu',
+            '/(\n)?(^[ ]*)([*+-]|\d+[.])[ ]+((?s:.+?)(?:\z|\n{1,2}))(?=\n*(?:\z|\2([*+-]|\d+[.])[ ]+))/m',
             array($this, 'processListItemsCallback'),
             $list
         );
@@ -54,8 +54,7 @@ class ListFormatter extends AbstractBlockFormatter
 
     public function format($text)
     {
-
-        $listsPattern = '/^(([ ]{0,3}((?:[*+-]|\d+[.]))[ ]+)(?s:.+?)(\z|\n{2,}(?=\S)(?![ ]*(?:[*+-]|\d+[.])[ ]+)))/mu';
+        $listsPattern = '/^(([ ]{0,3}((?:[*+-]|\d+[.]))[ ]+)(?s:.+?)(\z|\n{2,}(?=\S)(?![ ]*(?:[*+-]|\d+[.])[ ]+)))/m';
 
         return preg_replace_callback($listsPattern, array($this, 'transformListsCallback'), $text);
     }

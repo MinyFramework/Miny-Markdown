@@ -17,7 +17,7 @@ class YoutubeFormatter extends AbstractLineFormatter
 
     public function getPattern()
     {
-        return '/(?<!\\\)\[youtube\]\((.+?)(?<!\\\)\)/u';
+        return '/(?<!\\\)\[youtube\]\((.+?)(?<!\\\)\)/';
     }
 
     public function format($matches)

@@ -1,8 +1,8 @@
-<h1><strong>bold</strong> header</h1>
+<h1><strong>bold</strong>&nbsp;header</h1>
 
-<h2>Header with <em>emphasized</em> text</h2>
+<h2>Header with <em>emphasized</em>&nbsp;text</h2>
 
-<h1>Title <code>with</code> code</h1>
+<h1>Title <code>with</code>&nbsp;code</h1>
 
 <h2>h2</h2>
 

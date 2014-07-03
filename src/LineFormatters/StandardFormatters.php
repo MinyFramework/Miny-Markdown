@@ -61,7 +61,7 @@ class StandardFormatters extends AbstractLineFormatter
     public function prepare($text)
     {
         return preg_replace_callback(
-            '/^[ ]{0,3}\[(.*)\]:[ ]*\n?[ ]*<?(\S+?)>?[ ]*\n?[ ]*(?:(?<=\s)["(](.*?)[")][ ]*)?(?:\n+|\Z)/mu',
+            '/^[ ]{0,3}\[(.*)\]:[ ]*\n?[ ]*<?(\S+?)>?[ ]*\n?[ ]*(?:(?<=\s)["(](.*?)[")][ ]*)?(?:\n+|\Z)/m',
             array($this, 'collectLinkDefinition'),
             $text
         );
@@ -80,7 +80,7 @@ class StandardFormatters extends AbstractLineFormatter
         |<(\w+@(?:\w+[.])*\w+)>                                     # auto email        14
         |(\*\*|\_\_)((?:\\\\.|[^\15\\\\])*?)\15                     # bold              15, 16
         |(\*|\_)((?:\\\\.|[^\17\\\\])*?)\17                         # italic            17, 18
-        )/xu';
+        )/x';
     }
 
     public function formatCode($matches, $base)
